@@ -20,5 +20,5 @@ Symply manage audio session, now playing media and remote commands
     MediaSession.setMedia(media.copyWith(position:5));
 ```
 
-*duration and position are exprimed in seconds*
+*duration and position are expressed in seconds*
 
