@@ -22,3 +22,7 @@ Symply manage audio session, now playing media and remote commands
 
 *duration and position are expressed in seconds*
 
+![Cover](<flutter.media.session.jpg> "FMS")
+
+*(AI generated image)*
+
