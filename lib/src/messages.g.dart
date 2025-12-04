@@ -7,6 +7,23 @@ import 'dart:typed_data' show Float64List, Int32List, Int64List, Uint8List;
 
 import 'package:flutter/foundation.dart' show ReadBuffer, WriteBuffer;
 import 'package:flutter/services.dart';
+
+PlatformException _createConnectionError(String channelName) {
+  return PlatformException(
+    code: 'channel-error',
+    message: 'Unable to establish connection on channel: "$channelName".',
+  );
+}
+
+List<Object?> wrapResponse({Object? result, PlatformException? error, bool empty = false}) {
+  if (empty) {
+    return <Object?>[];
+  }
+  if (error == null) {
+    return <Object?>[result];
+  }
+  return <Object?>[error.code, error.message, error.details];
+}
 bool _deepEquals(Object? a, Object? b) {
   if (a is List && b is List) {
     return a.length == b.length &&
@@ -24,11 +41,35 @@ bool _deepEquals(Object? a, Object? b) {
 
 /// ///////////////////////////////////////////////////////////////////////////////////////////////////////
 /// ///////////////////////////////////////////////////////////////////////////////////////////////////////
+enum MediaCommand {
+  pause,
+  play,
+  stop,
+  togglePlayPause,
+  nextTrack,
+  previousTrack,
+  changeRepeatMode,
+  changeShuffleMode,
+  changePlayBackRate,
+  seekBackward,
+  seekForward,
+  skipBackward,
+  skipForward,
+  changePlaybackPosition,
+  rating,
+  like,
+  dislike,
+  bookmark,
+}
+
+/// ///////////////////////////////////////////////////////////////////////////////////////////////////////
+/// ///////////////////////////////////////////////////////////////////////////////////////////////////////
 class MediaItem {
   MediaItem({
     this.title,
     this.artist,
     this.artUri,
+    this.playing,
   });
 
   String? title;
@@ -37,11 +78,14 @@ class MediaItem {
 
   String? artUri;
 
+  bool? playing;
+
   List<Object?> _toList() {
     return <Object?>[
       title,
       artist,
       artUri,
+      playing,
     ];
   }
 
@@ -54,6 +98,7 @@ class MediaItem {
       title: result[0] as String?,
       artist: result[1] as String?,
       artUri: result[2] as String?,
+      playing: result[3] as bool?,
     );
   }
 
@@ -83,8 +128,11 @@ class _PigeonCodec extends StandardMessageCodec {
     if (value is int) {
       buffer.putUint8(4);
       buffer.putInt64(value);
-    }    else if (value is MediaItem) {
+    }    else if (value is MediaCommand) {
       buffer.putUint8(129);
+      writeValue(buffer, value.index);
+    }    else if (value is MediaItem) {
+      buffer.putUint8(130);
       writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
@@ -95,9 +143,88 @@ class _PigeonCodec extends StandardMessageCodec {
   Object? readValueOfType(int type, ReadBuffer buffer) {
     switch (type) {
       case 129: 
+        final int? value = readValue(buffer) as int?;
+        return value == null ? null : MediaCommand.values[value];
+      case 130: 
         return MediaItem.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
+    }
+  }
+}
+
+/// ///////////////////////////////////////////////////////////////////////////////////////////////////////
+/// ///////////////////////////////////////////////////////////////////////////////////////////////////////
+class MediaSessionProtocol {
+  /// Constructor for [MediaSessionProtocol].  The [binaryMessenger] named argument is
+  /// available for dependency injection.  If it is left null, the default
+  /// BinaryMessenger will be used which routes to the host platform.
+  MediaSessionProtocol({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
+      : pigeonVar_binaryMessenger = binaryMessenger,
+        pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+  final BinaryMessenger? pigeonVar_binaryMessenger;
+
+  static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
+
+  final String pigeonVar_messageChannelSuffix;
+
+  Future<void> setMedia(MediaItem item) async {
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_media_session.MediaSessionProtocol.setMedia$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[item]);
+    final List<Object?>? pigeonVar_replyList =
+        await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+}
+
+/// ///////////////////////////////////////////////////////////////////////////////////////////////////////
+/// ///////////////////////////////////////////////////////////////////////////////////////////////////////
+abstract class MediaCommandCenterProtocol {
+  static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
+
+  void command(MediaCommand command);
+
+  static void setUp(MediaCommandCenterProtocol? api, {BinaryMessenger? binaryMessenger, String messageChannelSuffix = '',}) {
+    messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+    {
+      final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+          'dev.flutter.pigeon.flutter_media_session.MediaCommandCenterProtocol.command$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          assert(message != null,
+          'Argument for dev.flutter.pigeon.flutter_media_session.MediaCommandCenterProtocol.command was null.');
+          final List<Object?> args = (message as List<Object?>?)!;
+          final MediaCommand? arg_command = (args[0] as MediaCommand?);
+          assert(arg_command != null,
+              'Argument for dev.flutter.pigeon.flutter_media_session.MediaCommandCenterProtocol.command was null, expected non-null MediaCommand.');
+          try {
+            api.command(arg_command!);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          }
+        });
+      }
     }
   }
 }

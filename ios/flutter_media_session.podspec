@@ -11,7 +11,7 @@ Send Media Session item to the OS.
   s.source           = { :path => '.' }
   s.source_files = 'flutter_media_session/Sources/flutter_media_session/**/*'
   s.dependency 'Flutter'
-  s.platform = :ios, '13.0'
+  s.platform = :ios, '16.0'
 
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386' }
   s.swift_version = '5.0'

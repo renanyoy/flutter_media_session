@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
     name: "flutter_media_session",
     platforms: [
-        .iOS("13.0")
+        .iOS("16.0")
     ],
     products: [
         .library(name: "flutter-media-session", targets: ["flutter_media_session"])

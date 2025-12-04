@@ -6,9 +6,11 @@ import 'package:pigeon/pigeon.dart';
   PigeonOptions(
     dartOut: 'lib/src/messages.g.dart',
     dartOptions: DartOptions(),
-    swiftOut:
-        'ios/flutter_media_session/Sources/messages.g.swift',
+    swiftOut: 'ios/flutter_media_session/Sources/messages.g.swift',
     swiftOptions: SwiftOptions(),
+    kotlinOut:
+        'android/src/main/kotlin/org/aestesis/flutter_media_session/messages.g.kt',
+    kotlinOptions: KotlinOptions(),
     dartPackageName: 'flutter_media_session',
   ),
 )
@@ -18,6 +20,44 @@ class MediaItem {
   String? title;
   String? artist;
   String? artUri;
+  bool? playing;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+@HostApi()
+abstract class MediaSessionProtocol {
+  void setMedia(MediaItem item);
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+enum MediaCommand {
+  pause,
+  play,
+  stop,
+  togglePlayPause,
+  nextTrack,
+  previousTrack,
+  changeRepeatMode,
+  changeShuffleMode,
+  changePlayBackRate,
+  seekBackward,
+  seekForward,
+  skipBackward,
+  skipForward,
+  changePlaybackPosition,
+  rating,
+  like,
+  dislike,
+  bookmark,
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+@FlutterApi()
+abstract class MediaCommandCenterProtocol {
+  void command(MediaCommand command);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
