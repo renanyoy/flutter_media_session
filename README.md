@@ -1,6 +1,6 @@
 # Flutter Media Session
 
-Symply manage Audio Session and Media Session
+Symply manage audio session, now playing media and remote commands
 
 ```dart
     import 'package:flutter_media_session/flutter_media_session.dart'
