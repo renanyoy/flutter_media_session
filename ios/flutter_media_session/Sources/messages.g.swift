@@ -163,6 +163,8 @@ struct MediaItem: Hashable {
   var title: String? = nil
   var artist: String? = nil
   var artUri: String? = nil
+  var position: Double? = nil
+  var duration: Double? = nil
   var playing: Bool? = nil
 
 
@@ -171,12 +173,16 @@ struct MediaItem: Hashable {
     let title: String? = nilOrValue(pigeonVar_list[0])
     let artist: String? = nilOrValue(pigeonVar_list[1])
     let artUri: String? = nilOrValue(pigeonVar_list[2])
-    let playing: Bool? = nilOrValue(pigeonVar_list[3])
+    let position: Double? = nilOrValue(pigeonVar_list[3])
+    let duration: Double? = nilOrValue(pigeonVar_list[4])
+    let playing: Bool? = nilOrValue(pigeonVar_list[5])
 
     return MediaItem(
       title: title,
       artist: artist,
       artUri: artUri,
+      position: position,
+      duration: duration,
       playing: playing
     )
   }
@@ -185,6 +191,8 @@ struct MediaItem: Hashable {
       title,
       artist,
       artUri,
+      position,
+      duration,
       playing,
     ]
   }

@@ -69,6 +69,8 @@ class MediaItem {
     this.title,
     this.artist,
     this.artUri,
+    this.position,
+    this.duration,
     this.playing,
   });
 
@@ -78,6 +80,10 @@ class MediaItem {
 
   String? artUri;
 
+  double? position;
+
+  double? duration;
+
   bool? playing;
 
   List<Object?> _toList() {
@@ -85,6 +91,8 @@ class MediaItem {
       title,
       artist,
       artUri,
+      position,
+      duration,
       playing,
     ];
   }
@@ -98,7 +106,9 @@ class MediaItem {
       title: result[0] as String?,
       artist: result[1] as String?,
       artUri: result[2] as String?,
-      playing: result[3] as bool?,
+      position: result[3] as double?,
+      duration: result[4] as double?,
+      playing: result[5] as bool?,
     );
   }
 

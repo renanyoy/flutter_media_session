@@ -121,6 +121,8 @@ data class MediaItem (
   val title: String? = null,
   val artist: String? = null,
   val artUri: String? = null,
+  val position: Double? = null,
+  val duration: Double? = null,
   val playing: Boolean? = null
 )
  {
@@ -129,8 +131,10 @@ data class MediaItem (
       val title = pigeonVar_list[0] as String?
       val artist = pigeonVar_list[1] as String?
       val artUri = pigeonVar_list[2] as String?
-      val playing = pigeonVar_list[3] as Boolean?
-      return MediaItem(title, artist, artUri, playing)
+      val position = pigeonVar_list[3] as Double?
+      val duration = pigeonVar_list[4] as Double?
+      val playing = pigeonVar_list[5] as Boolean?
+      return MediaItem(title, artist, artUri, position, duration, playing)
     }
   }
   fun toList(): List<Any?> {
@@ -138,6 +142,8 @@ data class MediaItem (
       title,
       artist,
       artUri,
+      position,
+      duration,
       playing,
     )
   }

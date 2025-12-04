@@ -20,6 +20,8 @@ class MediaItem {
   String? title;
   String? artist;
   String? artUri;
+  double? position;
+  double? duration;
   bool? playing;
 }
 

@@ -31,11 +31,9 @@ public class FlutterMediaSessionPlugin: NSObject, FlutterPlugin, MediaSessionPro
     var info: [String: Any] = [:]
     if item.title != nil {
       info[MPMediaItemPropertyTitle] = item.title!
-      print("setMedia(title:\(item.title))")
     }
     if item.artist != nil {
       info[MPMediaItemPropertyArtist] = item.artist!
-      print("setMedia(artist:\(item.artist))")
     }
     if item.artUri != nil {
       let url = URL(string: item.artUri!)
@@ -45,13 +43,19 @@ public class FlutterMediaSessionPlugin: NSObject, FlutterPlugin, MediaSessionPro
             let mi = MPMediaItemArtwork(
               boundsSize: img.size, requestHandler: { _ in return img })
             info[MPMediaItemPropertyArtwork] = mi
-            print("setMedia(Artwork:\(img.size))")
           }
         } else {
           // TODO:
         }
       }
     }
+    if item.position != nil {
+      info[MPMediaItemPropertyPlaybackDuration] = info.position!
+    }
+    if item.duration != nil {
+      info[MPMediaItemPropertyPlaybackDuration] = info.duration!
+    }
+
     MPNowPlayingInfoCenter.default().nowPlayingInfo = info
     if let playing = item.playing {
       MPNowPlayingInfoCenter.default().playbackState = playing ? .playing : .paused

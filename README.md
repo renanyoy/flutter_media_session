@@ -10,12 +10,15 @@ Symply manage audio session, now playing media and remote commands
 
     // when playing item
     MediaSession.setActiveCommands([.play, .pause]);
-    MediaSession.setMedia(
-      MediaItem(title: 'Simplicity', artist: 'Joe Simple', playing: true),
-    );
+    final media = MediaItem(title: 'Simplicity', artist: 'Joe Simple', duration: 180, playing: true);
+    MediaSession.setMedia(media);
     final subscribtion = MediaSession.listen((MediaCommand command) {
         // react on remote commands
     });
+
+    // update item
+    MediaSession.setMedia(media.copyWith(position:5));
 ```
 
+*duration and position are exprimed in seconds*
 
