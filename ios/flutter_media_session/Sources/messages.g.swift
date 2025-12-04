@@ -246,6 +246,7 @@ class MessagesPigeonCodec: FlutterStandardMessageCodec, @unchecked Sendable {
 /// Generated protocol from Pigeon that represents a handler of messages from Flutter.
 protocol MediaSessionProtocol {
   func setMedia(item: MediaItem) throws
+  func setActiveCommands(commands: [MediaCommand]) throws
 }
 
 /// Generated setup class from Pigeon to handle messages through the `binaryMessenger`.
@@ -269,16 +270,31 @@ class MediaSessionProtocolSetup {
     } else {
       setMediaChannel.setMessageHandler(nil)
     }
+    let setActiveCommandsChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.flutter_media_session.MediaSessionProtocol.setActiveCommands\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      setActiveCommandsChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let commandsArg = args[0] as! [MediaCommand]
+        do {
+          try api.setActiveCommands(commands: commandsArg)
+          reply(wrapResult(nil))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      setActiveCommandsChannel.setMessageHandler(nil)
+    }
   }
 }
 /// ///////////////////////////////////////////////////////////////////////////////////////////////////////
 /// ///////////////////////////////////////////////////////////////////////////////////////////////////////
 ///
 /// Generated protocol from Pigeon that represents Flutter messages that can be called from Swift.
-protocol MediaCommandCenterProtocolProtocol {
+protocol MediaCommandCenterProtocol {
   func command(command commandArg: MediaCommand, completion: @escaping (Result<Void, PigeonError>) -> Void)
 }
-class MediaCommandCenterProtocol: MediaCommandCenterProtocolProtocol {
+class MediaCommandCenter: MediaCommandCenterProtocol {
   private let binaryMessenger: FlutterBinaryMessenger
   private let messageChannelSuffix: String
   init(binaryMessenger: FlutterBinaryMessenger, messageChannelSuffix: String = "") {
@@ -289,7 +305,7 @@ class MediaCommandCenterProtocol: MediaCommandCenterProtocolProtocol {
     return MessagesPigeonCodec.shared
   }
   func command(command commandArg: MediaCommand, completion: @escaping (Result<Void, PigeonError>) -> Void) {
-    let channelName: String = "dev.flutter.pigeon.flutter_media_session.MediaCommandCenterProtocol.command\(messageChannelSuffix)"
+    let channelName: String = "dev.flutter.pigeon.flutter_media_session.MediaCommandCenter.command\(messageChannelSuffix)"
     let channel = FlutterBasicMessageChannel(name: channelName, binaryMessenger: binaryMessenger, codec: codec)
     channel.sendMessage([commandArg] as [Any?]) { response in
       guard let listResponse = response as? [Any?] else {

@@ -29,7 +29,7 @@ class _MyAppState extends State<MyApp> {
     // Platform messages may fail, so we use a try/catch PlatformException.
     // We also handle the message potentially returning null.
     try {
-      await mediaSession.setMedia(
+      await MediaSession.setMedia(
         MediaItem(title: 'title', artist: 'renan', playing: true),
       );
     } on PlatformException catch (error) {

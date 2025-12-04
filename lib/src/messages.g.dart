@@ -190,31 +190,54 @@ class MediaSessionProtocol {
       return;
     }
   }
+
+  Future<void> setActiveCommands(List<MediaCommand> commands) async {
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_media_session.MediaSessionProtocol.setActiveCommands$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[commands]);
+    final List<Object?>? pigeonVar_replyList =
+        await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
 }
 
 /// ///////////////////////////////////////////////////////////////////////////////////////////////////////
 /// ///////////////////////////////////////////////////////////////////////////////////////////////////////
-abstract class MediaCommandCenterProtocol {
+abstract class MediaCommandCenter {
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
 
   void command(MediaCommand command);
 
-  static void setUp(MediaCommandCenterProtocol? api, {BinaryMessenger? binaryMessenger, String messageChannelSuffix = '',}) {
+  static void setUp(MediaCommandCenter? api, {BinaryMessenger? binaryMessenger, String messageChannelSuffix = '',}) {
     messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
     {
       final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-          'dev.flutter.pigeon.flutter_media_session.MediaCommandCenterProtocol.command$messageChannelSuffix', pigeonChannelCodec,
+          'dev.flutter.pigeon.flutter_media_session.MediaCommandCenter.command$messageChannelSuffix', pigeonChannelCodec,
           binaryMessenger: binaryMessenger);
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
         pigeonVar_channel.setMessageHandler((Object? message) async {
           assert(message != null,
-          'Argument for dev.flutter.pigeon.flutter_media_session.MediaCommandCenterProtocol.command was null.');
+          'Argument for dev.flutter.pigeon.flutter_media_session.MediaCommandCenter.command was null.');
           final List<Object?> args = (message as List<Object?>?)!;
           final MediaCommand? arg_command = (args[0] as MediaCommand?);
           assert(arg_command != null,
-              'Argument for dev.flutter.pigeon.flutter_media_session.MediaCommandCenterProtocol.command was null, expected non-null MediaCommand.');
+              'Argument for dev.flutter.pigeon.flutter_media_session.MediaCommandCenter.command was null, expected non-null MediaCommand.');
           try {
             api.command(arg_command!);
             return wrapResponse(empty: true);

@@ -191,6 +191,7 @@ private open class messagesPigeonCodec : StandardMessageCodec() {
  */
 interface MediaSessionProtocol {
   fun setMedia(item: MediaItem)
+  fun setActiveCommands(commands: List<MediaCommand>)
 
   companion object {
     /** The codec used by MediaSessionProtocol. */
@@ -219,6 +220,24 @@ interface MediaSessionProtocol {
           channel.setMessageHandler(null)
         }
       }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_media_session.MediaSessionProtocol.setActiveCommands$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val commandsArg = args[0] as List<MediaCommand>
+            val wrapped: List<Any?> = try {
+              api.setActiveCommands(commandsArg)
+              listOf(null)
+            } catch (exception: Throwable) {
+              MessagesPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
     }
   }
 }
@@ -228,9 +247,9 @@ interface MediaSessionProtocol {
  *
  * Generated class from Pigeon that represents Flutter messages that can be called from Kotlin.
  */
-class MediaCommandCenterProtocol(private val binaryMessenger: BinaryMessenger, private val messageChannelSuffix: String = "") {
+class MediaCommandCenter(private val binaryMessenger: BinaryMessenger, private val messageChannelSuffix: String = "") {
   companion object {
-    /** The codec used by MediaCommandCenterProtocol. */
+    /** The codec used by MediaCommandCenter. */
     val codec: MessageCodec<Any?> by lazy {
       messagesPigeonCodec()
     }
@@ -238,7 +257,7 @@ class MediaCommandCenterProtocol(private val binaryMessenger: BinaryMessenger, p
   fun command(commandArg: MediaCommand, callback: (Result<Unit>) -> Unit)
 {
     val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
-    val channelName = "dev.flutter.pigeon.flutter_media_session.MediaCommandCenterProtocol.command$separatedMessageChannelSuffix"
+    val channelName = "dev.flutter.pigeon.flutter_media_session.MediaCommandCenter.command$separatedMessageChannelSuffix"
     val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
     channel.send(listOf(commandArg)) {
       if (it is List<*>) {

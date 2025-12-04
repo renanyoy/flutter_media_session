@@ -4,13 +4,27 @@ import UIKit
 
 public class FlutterMediaSessionPlugin: NSObject, FlutterPlugin, MediaSessionProtocol {
   static let instance: FlutterMediaSessionPlugin = FlutterMediaSessionPlugin()
-  static var message: MediaCommandCenterProtocolProtocol?
+  static var message: MediaCommandCenter?
   public static func register(with registrar: FlutterPluginRegistrar) {
     let messenger = registrar.messenger()
     MediaSessionProtocolSetup.setUp(binaryMessenger: messenger, api: instance)
-    message = MediaCommandCenterProtocolProtocol(binaryMessenger: messenger)
+    message = MediaCommandCenter(binaryMessenger: messenger)
   }
 
+  override init() {
+    super.init()
+    let center = MPRemoteCommandCenter.shared()
+    center.playCommand.addTarget(handler: { e in
+      FlutterMediaSessionPlugin.message?.command(command: .play, completion: { _ in })
+      return .success
+    })
+  }
+
+  func setActiveCommands(commands: [MediaCommand]) throws {
+    let center = MPRemoteCommandCenter.shared()
+    center.playCommand.isEnabled = commands.contains(.play)
+    center.pauseCommand.isEnabled = commands.contains(.pause)
+  }
   func setMedia(item: MediaItem) throws {
     var info: [String: Any] = [:]
     if item.title != nil {
@@ -44,9 +58,4 @@ public class FlutterMediaSessionPlugin: NSObject, FlutterPlugin, MediaSessionPro
     }
   }
 
-  func enableCommands() throws {
-    let center = MPRemoteCommandCenter.shared()
-    center.togglePlayPauseCommand.isEnabled = true
-    center.togglePlayPauseCommand.addTarget { e in return .success }
-  }
 }
