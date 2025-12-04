@@ -46,3 +46,17 @@ class _CommandCenter extends MediaCommandCenter {
     _messageCtrl.add(command);
   }
 }
+
+extension MediaItemCopyExt on MediaItem {
+  MediaItem copyWith({
+    String? title,
+    String? artist,
+    String? artUri,
+    bool? playing,
+  }) => MediaItem(
+    title: title ?? this.title,
+    artist: artist ?? this.artist,
+    artUri: artUri ?? this.artUri,
+    playing: playing ?? this.playing,
+  );
+}
