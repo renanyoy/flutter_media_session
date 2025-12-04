@@ -22,8 +22,10 @@ public class FlutterMediaSessionPlugin: NSObject, FlutterPlugin, MediaSessionPro
 
   func setActiveCommands(commands: [MediaCommand]) throws {
     let center = MPRemoteCommandCenter.shared()
+    center.stopCommand.isEnabled = commands.contains(.stop)
     center.playCommand.isEnabled = commands.contains(.play)
     center.pauseCommand.isEnabled = commands.contains(.pause)
+    center.togglePlayPauseCommand.isEnabled = commands.contains(.togglePlayPause)
   }
   func setMedia(item: MediaItem) throws {
     var info: [String: Any] = [:]

@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:audio_session/audio_session.dart' as session;
+
 import './messages.g.dart';
 
 class MediaSession {
@@ -19,7 +21,20 @@ class MediaSession {
     onDone: onDone,
     cancelOnError: cancelOnError,
   );
+  static Future<void> setAudioSession(AudioSession type) async {
+    final audio = await session.AudioSession.instance;
+    switch (type) {
+      case AudioSession.music:
+        return await audio.configure(session.AudioSessionConfiguration.music());
+      case AudioSession.speech:
+        return await audio.configure(
+          session.AudioSessionConfiguration.speech(),
+        );
+    }
+  }
 }
+
+enum AudioSession { music, speech }
 
 class _CommandCenter extends MediaCommandCenter {
   final _messageCtrl = StreamController<MediaCommand>.broadcast();
