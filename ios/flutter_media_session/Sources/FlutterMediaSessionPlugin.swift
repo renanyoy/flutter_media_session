@@ -127,6 +127,12 @@ public class FlutterMediaSessionPlugin: NSObject, FlutterPlugin, MediaSessionPro
             info[MPMediaItemPropertyArtwork] = mi
           }
         }
+      } else {
+          if let img: UIImage = UIImage(contentsOfFile: item.artUri!) {
+            let mi = MPMediaItemArtwork(
+              boundsSize: img.size, requestHandler: { _ in return img })
+            info[MPMediaItemPropertyArtwork] = mi
+          }
       }
     }
     if item.position != nil {
