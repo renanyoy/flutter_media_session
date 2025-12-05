@@ -43,7 +43,7 @@ public class FlutterMediaSessionPlugin: NSObject, FlutterPlugin, MediaSessionPro
       default:
         type = .none
       }
-      return not(command: .changeRepeatMode, value: type)
+      return not(command: .repeatMode, value: type)
     })
     center.changeShuffleModeCommand.addTarget(handler: { e in
       guard let s = e as? MPChangeShuffleModeCommandEvent else { return .commandFailed }
@@ -56,18 +56,18 @@ public class FlutterMediaSessionPlugin: NSObject, FlutterPlugin, MediaSessionPro
       default:
         type = .none
       }
-      return not(command: .changeShuffleMode, value: type)
+      return not(command: .shuffleMode, value: type)
     })
     center.changePlaybackRateCommand.addTarget(handler: { e in
       guard let r = e as? MPChangePlaybackRateCommandEvent else { return .commandFailed }
       return not(
-        command: .changePlayBackRate,
+        command: .playBackRate,
         value: r.playbackRate)
     })
     center.changePlaybackPositionCommand.addTarget(handler: { e in
       guard let p = e as? MPChangePlaybackPositionCommandEvent else { return .commandFailed }
       return not(
-        command: .changePlaybackPosition,
+        command: .position,
         value: p.positionTime)
     })
     center.ratingCommand.addTarget(handler: { e in
@@ -92,11 +92,11 @@ public class FlutterMediaSessionPlugin: NSObject, FlutterPlugin, MediaSessionPro
     center.togglePlayPauseCommand.isEnabled = commands.contains(.togglePlayPause)
     center.nextTrackCommand.isEnabled = commands.contains(.nextTrack)
     center.previousTrackCommand.isEnabled = commands.contains(.previousTrack)
-    center.changeRepeatModeCommand.isEnabled = commands.contains(.changeRepeatMode)
-    center.changeShuffleModeCommand.isEnabled = commands.contains(.changeShuffleMode)
-    center.changePlaybackRateCommand.isEnabled = commands.contains(.changePlayBackRate)
+    center.changeRepeatModeCommand.isEnabled = commands.contains(.repeatMode)
+    center.changeShuffleModeCommand.isEnabled = commands.contains(.shuffleMode)
+    center.changePlaybackRateCommand.isEnabled = commands.contains(.playBackRate)
     center.changePlaybackRateCommand.supportedPlaybackRates = [0.5, 0.75, 1, 1.25, 1.5]
-    center.changePlaybackPositionCommand.isEnabled = commands.contains(.changePlaybackPosition)
+    center.changePlaybackPositionCommand.isEnabled = commands.contains(.position)
     center.ratingCommand.isEnabled = commands.contains(.rating)
     center.ratingCommand.maximumRating = 5
     center.ratingCommand.minimumRating = 1
