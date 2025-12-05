@@ -111,6 +111,31 @@ enum class MediaCommand(val raw: Int) {
   }
 }
 
+/**/////////////////////////////////////////////////////////////////////////////////////////////////////// */
+enum class MediaRepeatType(val raw: Int) {
+  NONE(0),
+  ONE(1),
+  ALL(2);
+
+  companion object {
+    fun ofRaw(raw: Int): MediaRepeatType? {
+      return values().firstOrNull { it.raw == raw }
+    }
+  }
+}
+
+enum class MediaShuffleType(val raw: Int) {
+  NONE(0),
+  ITEMS(1),
+  COLLECTIONS(2);
+
+  companion object {
+    fun ofRaw(raw: Int): MediaShuffleType? {
+      return values().firstOrNull { it.raw == raw }
+    }
+  }
+}
+
 /**
  * ///////////////////////////////////////////////////////////////////////////////////////////////////////
  * ///////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -158,6 +183,41 @@ data class MediaItem (
 
   override fun hashCode(): Int = toList().hashCode()
 }
+
+/**
+ * ///////////////////////////////////////////////////////////////////////////////////////////////////////
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class MediaNotification (
+  val command: MediaCommand,
+  val value: Any? = null
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): MediaNotification {
+      val command = pigeonVar_list[0] as MediaCommand
+      val value = pigeonVar_list[1]
+      return MediaNotification(command, value)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      command,
+      value,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other !is MediaNotification) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    return MessagesPigeonUtils.deepEquals(toList(), other.toList())  }
+
+  override fun hashCode(): Int = toList().hashCode()
+}
 private open class messagesPigeonCodec : StandardMessageCodec() {
   override fun readValueOfType(type: Byte, buffer: ByteBuffer): Any? {
     return when (type) {
@@ -167,8 +227,23 @@ private open class messagesPigeonCodec : StandardMessageCodec() {
         }
       }
       130.toByte() -> {
+        return (readValue(buffer) as Long?)?.let {
+          MediaRepeatType.ofRaw(it.toInt())
+        }
+      }
+      131.toByte() -> {
+        return (readValue(buffer) as Long?)?.let {
+          MediaShuffleType.ofRaw(it.toInt())
+        }
+      }
+      132.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           MediaItem.fromList(it)
+        }
+      }
+      133.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          MediaNotification.fromList(it)
         }
       }
       else -> super.readValueOfType(type, buffer)
@@ -180,8 +255,20 @@ private open class messagesPigeonCodec : StandardMessageCodec() {
         stream.write(129)
         writeValue(stream, value.raw.toLong())
       }
-      is MediaItem -> {
+      is MediaRepeatType -> {
         stream.write(130)
+        writeValue(stream, value.raw.toLong())
+      }
+      is MediaShuffleType -> {
+        stream.write(131)
+        writeValue(stream, value.raw.toLong())
+      }
+      is MediaItem -> {
+        stream.write(132)
+        writeValue(stream, value.toList())
+      }
+      is MediaNotification -> {
+        stream.write(133)
         writeValue(stream, value.toList())
       }
       else -> super.writeValue(stream, value)
@@ -248,7 +335,7 @@ interface MediaSessionProtocol {
   }
 }
 /**
- * ///////////////////////////////////////////////////////////////////////////////////////////////////////
+ * //////////////////////////////////////////////////////////////////////////////////////////////////////
  * ///////////////////////////////////////////////////////////////////////////////////////////////////////
  *
  * Generated class from Pigeon that represents Flutter messages that can be called from Kotlin.
@@ -260,12 +347,12 @@ class MediaCommandCenter(private val binaryMessenger: BinaryMessenger, private v
       messagesPigeonCodec()
     }
   }
-  fun command(commandArg: MediaCommand, callback: (Result<Unit>) -> Unit)
+  fun notification(notificationArg: MediaNotification, callback: (Result<Unit>) -> Unit)
 {
     val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
-    val channelName = "dev.flutter.pigeon.flutter_media_session.MediaCommandCenter.command$separatedMessageChannelSuffix"
+    val channelName = "dev.flutter.pigeon.flutter_media_session.MediaCommandCenter.notification$separatedMessageChannelSuffix"
     val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
-    channel.send(listOf(commandArg)) {
+    channel.send(listOf(notificationArg)) {
       if (it is List<*>) {
         if (it.size > 1) {
           callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))

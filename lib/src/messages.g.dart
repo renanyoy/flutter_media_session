@@ -62,6 +62,19 @@ enum MediaCommand {
   bookmark,
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+enum MediaRepeatType {
+  none,
+  one,
+  all,
+}
+
+enum MediaShuffleType {
+  none,
+  items,
+  collections,
+}
+
 /// ///////////////////////////////////////////////////////////////////////////////////////////////////////
 /// ///////////////////////////////////////////////////////////////////////////////////////////////////////
 class MediaItem {
@@ -130,6 +143,53 @@ class MediaItem {
 ;
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+class MediaNotification {
+  MediaNotification({
+    required this.command,
+    this.value,
+  });
+
+  MediaCommand command;
+
+  Object? value;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      command,
+      value,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static MediaNotification decode(Object result) {
+    result as List<Object?>;
+    return MediaNotification(
+      command: result[0]! as MediaCommand,
+      value: result[1],
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! MediaNotification || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(encode(), other.encode());
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => Object.hashAll(_toList())
+;
+}
+
 
 class _PigeonCodec extends StandardMessageCodec {
   const _PigeonCodec();
@@ -141,8 +201,17 @@ class _PigeonCodec extends StandardMessageCodec {
     }    else if (value is MediaCommand) {
       buffer.putUint8(129);
       writeValue(buffer, value.index);
-    }    else if (value is MediaItem) {
+    }    else if (value is MediaRepeatType) {
       buffer.putUint8(130);
+      writeValue(buffer, value.index);
+    }    else if (value is MediaShuffleType) {
+      buffer.putUint8(131);
+      writeValue(buffer, value.index);
+    }    else if (value is MediaItem) {
+      buffer.putUint8(132);
+      writeValue(buffer, value.encode());
+    }    else if (value is MediaNotification) {
+      buffer.putUint8(133);
       writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
@@ -156,7 +225,15 @@ class _PigeonCodec extends StandardMessageCodec {
         final int? value = readValue(buffer) as int?;
         return value == null ? null : MediaCommand.values[value];
       case 130: 
+        final int? value = readValue(buffer) as int?;
+        return value == null ? null : MediaRepeatType.values[value];
+      case 131: 
+        final int? value = readValue(buffer) as int?;
+        return value == null ? null : MediaShuffleType.values[value];
+      case 132: 
         return MediaItem.decode(readValue(buffer)!);
+      case 133: 
+        return MediaNotification.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
     }
@@ -225,31 +302,31 @@ class MediaSessionProtocol {
   }
 }
 
-/// ///////////////////////////////////////////////////////////////////////////////////////////////////////
+/// //////////////////////////////////////////////////////////////////////////////////////////////////////
 /// ///////////////////////////////////////////////////////////////////////////////////////////////////////
 abstract class MediaCommandCenter {
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
 
-  void command(MediaCommand command);
+  void notification(MediaNotification notification);
 
   static void setUp(MediaCommandCenter? api, {BinaryMessenger? binaryMessenger, String messageChannelSuffix = '',}) {
     messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
     {
       final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-          'dev.flutter.pigeon.flutter_media_session.MediaCommandCenter.command$messageChannelSuffix', pigeonChannelCodec,
+          'dev.flutter.pigeon.flutter_media_session.MediaCommandCenter.notification$messageChannelSuffix', pigeonChannelCodec,
           binaryMessenger: binaryMessenger);
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
         pigeonVar_channel.setMessageHandler((Object? message) async {
           assert(message != null,
-          'Argument for dev.flutter.pigeon.flutter_media_session.MediaCommandCenter.command was null.');
+          'Argument for dev.flutter.pigeon.flutter_media_session.MediaCommandCenter.notification was null.');
           final List<Object?> args = (message as List<Object?>?)!;
-          final MediaCommand? arg_command = (args[0] as MediaCommand?);
-          assert(arg_command != null,
-              'Argument for dev.flutter.pigeon.flutter_media_session.MediaCommandCenter.command was null, expected non-null MediaCommand.');
+          final MediaNotification? arg_notification = (args[0] as MediaNotification?);
+          assert(arg_notification != null,
+              'Argument for dev.flutter.pigeon.flutter_media_session.MediaCommandCenter.notification was null, expected non-null MediaNotification.');
           try {
-            api.command(arg_command!);
+            api.notification(arg_notification!);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);

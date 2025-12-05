@@ -155,6 +155,19 @@ enum MediaCommand: Int {
   case bookmark = 17
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+enum MediaRepeatType: Int {
+  case none = 0
+  case one = 1
+  case all = 2
+}
+
+enum MediaShuffleType: Int {
+  case none = 0
+  case items = 1
+  case collections = 2
+}
+
 /// ///////////////////////////////////////////////////////////////////////////////////////////////////////
 /// ///////////////////////////////////////////////////////////////////////////////////////////////////////
 ///
@@ -203,6 +216,37 @@ struct MediaItem: Hashable {
   }
 }
 
+/// ///////////////////////////////////////////////////////////////////////////////////////////////////////
+///
+/// Generated class from Pigeon that represents data sent in messages.
+struct MediaNotification: Hashable {
+  var command: MediaCommand
+  var value: Any? = nil
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> MediaNotification? {
+    let command = pigeonVar_list[0] as! MediaCommand
+    let value: Any? = pigeonVar_list[1]
+
+    return MediaNotification(
+      command: command,
+      value: value
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      command,
+      value,
+    ]
+  }
+  static func == (lhs: MediaNotification, rhs: MediaNotification) -> Bool {
+    return deepEqualsmessages(lhs.toList(), rhs.toList())  }
+  func hash(into hasher: inout Hasher) {
+    deepHashmessages(value: toList(), hasher: &hasher)
+  }
+}
+
 private class MessagesPigeonCodecReader: FlutterStandardReader {
   override func readValue(ofType type: UInt8) -> Any? {
     switch type {
@@ -213,7 +257,21 @@ private class MessagesPigeonCodecReader: FlutterStandardReader {
       }
       return nil
     case 130:
+      let enumResultAsInt: Int? = nilOrValue(self.readValue() as! Int?)
+      if let enumResultAsInt = enumResultAsInt {
+        return MediaRepeatType(rawValue: enumResultAsInt)
+      }
+      return nil
+    case 131:
+      let enumResultAsInt: Int? = nilOrValue(self.readValue() as! Int?)
+      if let enumResultAsInt = enumResultAsInt {
+        return MediaShuffleType(rawValue: enumResultAsInt)
+      }
+      return nil
+    case 132:
       return MediaItem.fromList(self.readValue() as! [Any?])
+    case 133:
+      return MediaNotification.fromList(self.readValue() as! [Any?])
     default:
       return super.readValue(ofType: type)
     }
@@ -225,8 +283,17 @@ private class MessagesPigeonCodecWriter: FlutterStandardWriter {
     if let value = value as? MediaCommand {
       super.writeByte(129)
       super.writeValue(value.rawValue)
-    } else if let value = value as? MediaItem {
+    } else if let value = value as? MediaRepeatType {
       super.writeByte(130)
+      super.writeValue(value.rawValue)
+    } else if let value = value as? MediaShuffleType {
+      super.writeByte(131)
+      super.writeValue(value.rawValue)
+    } else if let value = value as? MediaItem {
+      super.writeByte(132)
+      super.writeValue(value.toList())
+    } else if let value = value as? MediaNotification {
+      super.writeByte(133)
       super.writeValue(value.toList())
     } else {
       super.writeValue(value)
@@ -295,12 +362,12 @@ class MediaSessionProtocolSetup {
     }
   }
 }
-/// ///////////////////////////////////////////////////////////////////////////////////////////////////////
+/// //////////////////////////////////////////////////////////////////////////////////////////////////////
 /// ///////////////////////////////////////////////////////////////////////////////////////////////////////
 ///
 /// Generated protocol from Pigeon that represents Flutter messages that can be called from Swift.
 protocol MediaCommandCenterProtocol {
-  func command(command commandArg: MediaCommand, completion: @escaping (Result<Void, PigeonError>) -> Void)
+  func notification(notification notificationArg: MediaNotification, completion: @escaping (Result<Void, PigeonError>) -> Void)
 }
 class MediaCommandCenter: MediaCommandCenterProtocol {
   private let binaryMessenger: FlutterBinaryMessenger
@@ -312,10 +379,10 @@ class MediaCommandCenter: MediaCommandCenterProtocol {
   var codec: MessagesPigeonCodec {
     return MessagesPigeonCodec.shared
   }
-  func command(command commandArg: MediaCommand, completion: @escaping (Result<Void, PigeonError>) -> Void) {
-    let channelName: String = "dev.flutter.pigeon.flutter_media_session.MediaCommandCenter.command\(messageChannelSuffix)"
+  func notification(notification notificationArg: MediaNotification, completion: @escaping (Result<Void, PigeonError>) -> Void) {
+    let channelName: String = "dev.flutter.pigeon.flutter_media_session.MediaCommandCenter.notification\(messageChannelSuffix)"
     let channel = FlutterBasicMessageChannel(name: channelName, binaryMessenger: binaryMessenger, codec: codec)
-    channel.sendMessage([commandArg] as [Any?]) { response in
+    channel.sendMessage([notificationArg] as [Any?]) { response in
       guard let listResponse = response as? [Any?] else {
         completion(.failure(createConnectionError(withChannelName: channelName)))
         return
