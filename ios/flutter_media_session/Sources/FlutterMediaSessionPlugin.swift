@@ -14,56 +14,28 @@ public class FlutterMediaSessionPlugin: NSObject, FlutterPlugin, MediaSessionPro
   override init() {
     super.init()
     let center = MPRemoteCommandCenter.shared()
-    let handler: (MPRemoteCommandEvent) -> MPRemoteCommandHandlerStatus = { e in
-      FlutterMediaSessionPlugin.message?.notification(
-        command: notification(e), completion: { _ in })
-      return .success
-    }
-    center.pauseCommand.addTarget(handler: handler)
-    center.playCommand.addTarget(handler: handler)
-    center.stopCommand.addTarget(hendler: handler)
-    center.togglePlayPauseCommand.addTarget(handler: handler)
-    center.nextTrackCommand.addTarget(handler: handler)
-    center.previousTrackCommand.addTarget(handler: handler)
-    center.changeRepeatModeCommand.addTarget(handler: handler)
-    center.changeShuffleModeCommand.addTarget(handler: handler)
-    center.changePlaybackRateCommand.addTarget(handler: handler)
-    center.changePlaybackPositionCommand.addTarget(handler: handler)
-    center.ratingCommand.addTarget(handler: handler)
-    center.likeCommand.addTarget(handler: { e in 
-      FlutterMediaSessionPlugin.message?.notification(
-        command: MediaNotification(command: .like), completion: { _ in })
-      return .success
+    center.pauseCommand.addTarget(handler: { e in
+      return not(command: .pause)
     })
-    center.dislikeCommand.addTarget(handler: { e in 
-      FlutterMediaSessionPlugin.message?.notification(
-        command: MediaNotification(command: .dislike), completion: { _ in })
-      return .success
+    center.playCommand.addTarget(handler: { e in
+      return not(command: .play)
     })
-    center.bookmarkCommand.addTarget(handler: { e in 
-      FlutterMediaSessionPlugin.message?.notification(
-        command: MediaNotification(command: .bookmark), completion: { _ in })
-      return .success
+    center.stopCommand.addTarget(handler: { e in
+      return not(command: .stop)
     })
-  }
-
-  func notification(e: MPRemoteCommand) -> MediaNotification {
-    switch e {
-    case let e as MPPauseCommand:
-      return MediaNotification(command: .pause)
-    case let e as MPPlayCommand:
-      return MediaNotification(command: .play)
-    case let e as MPStopCommand:
-      return MediaNotification(command: .stop)
-    case let e as MPTogglePlayPauseCommand:
-      return MediaNotification(command: .togglePlayPause)
-    case let e as MPNextTrackCommand:
-      return MediaNotification(command: .nextTrack)
-    case let e as MPPreviousTrackCommand:
-      return MediaNotification(command: .previousTrack)
-    case let e as MPChangeRepeatModeCommand:
+    center.togglePlayPauseCommand.addTarget(handler: { e in
+      return not(command: .togglePlayPause)
+    })
+    center.nextTrackCommand.addTarget(handler: { e in
+      return not(command: .nextTrack)
+    })
+    center.previousTrackCommand.addTarget(handler: { e in
+      return not(command: .previousTrack)
+    })
+    center.changeRepeatModeCommand.addTarget(handler: { e in
+      guard let r = e as? MPChangeRepeatModeCommandEvent else { return .commandFailed }
       var type: MediaRepeatType = .none
-      switch e.currentRepeatType {
+      switch r.repeatType {
       case .one:
         type = .one
       case .all:
@@ -71,10 +43,12 @@ public class FlutterMediaSessionPlugin: NSObject, FlutterPlugin, MediaSessionPro
       default:
         type = .none
       }
-      return MediaNotification(command: .changeRepeatMode, value: type)
-    case let e as MPChangeShuffleModeCommand:
+      return not(command: .changeRepeatMode, value: type)
+    })
+    center.changeShuffleModeCommand.addTarget(handler: { e in
+      guard let s = e as? MPChangeShuffleModeCommandEvent else { return .commandFailed }
       var type: MediaShuffleType = .none
-      switch e.currentShuffleType {
+      switch s.shuffleType {
       case .items:
         type = .items
       case .collections:
@@ -82,15 +56,32 @@ public class FlutterMediaSessionPlugin: NSObject, FlutterPlugin, MediaSessionPro
       default:
         type = .none
       }
-      return MediaNotification(command: .changeShuffleMode, value: type)
-    case let e as MPChangePlaybackRateCommand:
-      return MediaNotification(command: .changePlayBackRate)
-    case let e as MPChangePlaybackPositionCommand:
-      return MediaNotification(command: .changePlaybackPosition, value: e.timestamp)
-    case let e as MPRatingCommand:
-      return MediaNotification(command: .rating)
-    }
-    throw "not implemented"
+      return not(command: .changeShuffleMode, value: type)
+    })
+    center.changePlaybackRateCommand.addTarget(handler: { e in
+      guard let r = e as? MPChangePlaybackRateCommandEvent else { return .commandFailed }
+      return not(
+        command: .changePlayBackRate,
+        value: r.playbackRate)
+    })
+    center.changePlaybackPositionCommand.addTarget(handler: { e in
+      guard let p = e as? MPChangePlaybackPositionCommandEvent else { return .commandFailed }
+      return not(
+        command: .changePlaybackPosition,
+        value: p.positionTime)
+    })
+    center.ratingCommand.addTarget(handler: { e in
+      return not(command: .rating)
+    })
+    center.likeCommand.addTarget(handler: { e in
+      return not(command: .like)
+    })
+    center.dislikeCommand.addTarget(handler: { e in
+      return not(command: .dislike)
+    })
+    center.bookmarkCommand.addTarget(handler: { e in
+      return not(command: .bookmark)
+    })
   }
 
   func setActiveCommands(commands: [MediaCommand]) throws {
@@ -104,7 +95,7 @@ public class FlutterMediaSessionPlugin: NSObject, FlutterPlugin, MediaSessionPro
     center.changeRepeatModeCommand.isEnabled = commands.contains(.changeRepeatMode)
     center.changeShuffleModeCommand.isEnabled = commands.contains(.changeShuffleMode)
     center.changePlaybackRateCommand.isEnabled = commands.contains(.changePlayBackRate)
-    center.changePlaybackRateCommand.supportedPlaybackRates[0.5, 0.75, 1, 1.25, 1.5]
+    center.changePlaybackRateCommand.supportedPlaybackRates = [0.5, 0.75, 1, 1.25, 1.5]
     center.changePlaybackPositionCommand.isEnabled = commands.contains(.changePlaybackPosition)
     center.ratingCommand.isEnabled = commands.contains(.rating)
     center.ratingCommand.maximumRating = 5
@@ -122,8 +113,8 @@ public class FlutterMediaSessionPlugin: NSObject, FlutterPlugin, MediaSessionPro
       info[MPMediaItemPropertyArtist] = item.artist!
     }
     if item.artUri != nil {
-      let url = URL(string: item.artUri!)
-      if let url = url {
+      let u = URL(string: item.artUri!)
+      if let url = u {
         if url.isFileURL {
           if let img: UIImage = UIImage(contentsOfFile: url.path(percentEncoded: false)) {
             let mi = MPMediaItemArtwork(
@@ -131,7 +122,7 @@ public class FlutterMediaSessionPlugin: NSObject, FlutterPlugin, MediaSessionPro
             info[MPMediaItemPropertyArtwork] = mi
           }
         } else {
-          if let data = try? Data(contentsOf: url!), let img: UIImage = UIImage(data: data) {
+          if let data = try? Data(contentsOf: url), let img: UIImage = UIImage(data: data) {
             let mi = MPMediaItemArtwork(boundsSize: img.size, requestHandler: { _ in return img })
             info[MPMediaItemPropertyArtwork] = mi
           }
@@ -139,10 +130,10 @@ public class FlutterMediaSessionPlugin: NSObject, FlutterPlugin, MediaSessionPro
       }
     }
     if item.position != nil {
-      info[MPMediaItemPropertyPlaybackDuration] = info.position!
+      info[MPMediaItemPropertyPlaybackDuration] = item.position!
     }
     if item.duration != nil {
-      info[MPMediaItemPropertyPlaybackDuration] = info.duration!
+      info[MPMediaItemPropertyPlaybackDuration] = item.duration!
     }
 
     MPNowPlayingInfoCenter.default().nowPlayingInfo = info
@@ -153,4 +144,15 @@ public class FlutterMediaSessionPlugin: NSObject, FlutterPlugin, MediaSessionPro
     }
   }
 
+}
+
+func not(command: MediaCommand, value: Any? = nil) -> MPRemoteCommandHandlerStatus {
+  FlutterMediaSessionPlugin.message?.notification(
+    notification: MediaNotification(command: command, value: value),
+    completion: { r in
+      if let e = r as? PigeonError {
+        print("\(e)")
+      }
+    })
+  return .success
 }
