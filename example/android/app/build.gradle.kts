@@ -5,6 +5,10 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+dependencies {
+    implementation("androidx.media3:media3-session:1.8.0")
+}
+
 android {
     namespace = "org.aestesis.flutter_media_session_example"
     compileSdk = flutter.compileSdkVersion
