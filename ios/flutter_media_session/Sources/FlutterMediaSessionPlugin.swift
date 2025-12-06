@@ -128,6 +128,7 @@ public class FlutterMediaSessionPlugin: NSObject, FlutterPlugin, MediaSessionPro
           }
         }
       } else {
+        // TODO: debug, not working
           if let img: UIImage = UIImage(contentsOfFile: item.artUri!) {
             let mi = MPMediaItemArtwork(
               boundsSize: img.size, requestHandler: { _ in return img })
