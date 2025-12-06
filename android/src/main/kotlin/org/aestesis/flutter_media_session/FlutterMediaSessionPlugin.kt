@@ -1,19 +1,23 @@
 package org.aestesis.flutter_media_session
 
+import MediaCommand
+import MediaItem
+import MediaNotificationHandler
+import MediaSessionProtocol
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
-import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 
+// TODO: https://developer.android.com/media/media3
+
 class FlutterMediaSessionPlugin :
     FlutterPlugin,
-    MethodCallHandler {
-    private lateinit var channel: MethodChannel
-
+    MethodCallHandler, MediaSessionProtocol {
+    private lateinit var message: MediaNotificationHandler
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
-        channel = MethodChannel(flutterPluginBinding.binaryMessenger, "flutter_media_session")
-        channel.setMethodCallHandler(this)
+        MediaSessionProtocol.setUp(flutterPluginBinding.binaryMessenger,this)
+        message = MediaNotificationHandler(flutterPluginBinding.binaryMessenger)
     }
 
     override fun onMethodCall(
@@ -28,6 +32,16 @@ class FlutterMediaSessionPlugin :
     }
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
-        channel.setMethodCallHandler(null)
+        MediaSessionProtocol.setUp(binding.binaryMessenger,null)
+    }
+
+    override fun setMedia(item: MediaItem) {
+        println("setMedia")
+        // TODO("Not yet implemented")
+    }
+
+    override fun setActiveCommands(commands: List<MediaCommand>) {
+        println("setActiveCommands")
+        // TODO("Not yet implemented")
     }
 }

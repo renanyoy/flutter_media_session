@@ -302,27 +302,27 @@ class MediaSessionProtocol {
 
 /// //////////////////////////////////////////////////////////////////////////////////////////////////////
 /// ///////////////////////////////////////////////////////////////////////////////////////////////////////
-abstract class MediaCommandCenter {
+abstract class MediaNotificationHandler {
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
 
   void notification(MediaNotification notification);
 
-  static void setUp(MediaCommandCenter? api, {BinaryMessenger? binaryMessenger, String messageChannelSuffix = '',}) {
+  static void setUp(MediaNotificationHandler? api, {BinaryMessenger? binaryMessenger, String messageChannelSuffix = '',}) {
     messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
     {
       final pigeonVar_channel = BasicMessageChannel<Object?>(
-          'dev.flutter.pigeon.flutter_media_session.MediaCommandCenter.notification$messageChannelSuffix', pigeonChannelCodec,
+          'dev.flutter.pigeon.flutter_media_session.MediaNotificationHandler.notification$messageChannelSuffix', pigeonChannelCodec,
           binaryMessenger: binaryMessenger);
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
         pigeonVar_channel.setMessageHandler((Object? message) async {
           assert(message != null,
-          'Argument for dev.flutter.pigeon.flutter_media_session.MediaCommandCenter.notification was null.');
+          'Argument for dev.flutter.pigeon.flutter_media_session.MediaNotificationHandler.notification was null.');
           final List<Object?> args = (message as List<Object?>?)!;
           final MediaNotification? arg_notification = (args[0] as MediaNotification?);
           assert(arg_notification != null,
-              'Argument for dev.flutter.pigeon.flutter_media_session.MediaCommandCenter.notification was null, expected non-null MediaNotification.');
+              'Argument for dev.flutter.pigeon.flutter_media_session.MediaNotificationHandler.notification was null, expected non-null MediaNotification.');
           try {
             api.notification(arg_notification!);
             return wrapResponse(empty: true);

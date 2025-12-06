@@ -8,7 +8,7 @@ import './messages.g.dart';
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 class MediaSession {
   static final _session = MediaSessionProtocol();
-  static final _center = _CommandCenter();
+  static final _center = _NoticationHandler();
   static Future<void> setCommands(List<MediaCommand> commands) =>
       _session.setActiveCommands(commands);
   static Future<void> setMedia(MediaItem item) => _session.setMedia(item);
@@ -50,10 +50,10 @@ enum AudioSession { music, speech }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
-class _CommandCenter extends MediaCommandCenter {
+class _NoticationHandler extends MediaNotificationHandler {
   final _messageCtrl = StreamController<MediaNotification>.broadcast();
-  _CommandCenter() {
-    MediaCommandCenter.setUp(this);
+  _NoticationHandler() {
+    MediaNotificationHandler.setUp(this);
   }
   @override
   void notification(MediaNotification notification) {

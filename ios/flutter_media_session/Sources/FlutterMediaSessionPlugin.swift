@@ -4,11 +4,11 @@ import UIKit
 
 public class FlutterMediaSessionPlugin: NSObject, FlutterPlugin, MediaSessionProtocol {
   static let instance: FlutterMediaSessionPlugin = FlutterMediaSessionPlugin()
-  static var message: MediaCommandCenter?
+  static var message: MediaNotificationHandler?
   public static func register(with registrar: FlutterPluginRegistrar) {
     let messenger = registrar.messenger()
     MediaSessionProtocolSetup.setUp(binaryMessenger: messenger, api: instance)
-    message = MediaCommandCenter(binaryMessenger: messenger)
+    message = MediaNotificationHandler(binaryMessenger: messenger)
   }
 
   override init() {
