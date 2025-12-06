@@ -12,60 +12,67 @@ import io.flutter.plugin.common.StandardMethodCodec
 import io.flutter.plugin.common.StandardMessageCodec
 import java.io.ByteArrayOutputStream
 import java.nio.ByteBuffer
+
 private object MessagesPigeonUtils {
 
-  fun createConnectionError(channelName: String): FlutterError {
-    return FlutterError("channel-error",  "Unable to establish connection on channel: '$channelName'.", "")  }
+    fun createConnectionError(channelName: String): FlutterError {
+        return FlutterError(
+            "channel-error",
+            "Unable to establish connection on channel: '$channelName'.",
+            ""
+        )
+    }
 
-  fun wrapResult(result: Any?): List<Any?> {
-    return listOf(result)
-  }
+    fun wrapResult(result: Any?): List<Any?> {
+        return listOf(result)
+    }
 
-  fun wrapError(exception: Throwable): List<Any?> {
-    return if (exception is FlutterError) {
-      listOf(
-        exception.code,
-        exception.message,
-        exception.details
-      )
-    } else {
-      listOf(
-        exception.javaClass.simpleName,
-        exception.toString(),
-        "Cause: " + exception.cause + ", Stacktrace: " + Log.getStackTraceString(exception)
-      )
+    fun wrapError(exception: Throwable): List<Any?> {
+        return if (exception is FlutterError) {
+            listOf(
+                exception.code,
+                exception.message,
+                exception.details
+            )
+        } else {
+            listOf(
+                exception.javaClass.simpleName,
+                exception.toString(),
+                "Cause: " + exception.cause + ", Stacktrace: " + Log.getStackTraceString(exception)
+            )
+        }
     }
-  }
-  fun deepEquals(a: Any?, b: Any?): Boolean {
-    if (a is ByteArray && b is ByteArray) {
-        return a.contentEquals(b)
+
+    fun deepEquals(a: Any?, b: Any?): Boolean {
+        if (a is ByteArray && b is ByteArray) {
+            return a.contentEquals(b)
+        }
+        if (a is IntArray && b is IntArray) {
+            return a.contentEquals(b)
+        }
+        if (a is LongArray && b is LongArray) {
+            return a.contentEquals(b)
+        }
+        if (a is DoubleArray && b is DoubleArray) {
+            return a.contentEquals(b)
+        }
+        if (a is Array<*> && b is Array<*>) {
+            return a.size == b.size &&
+                    a.indices.all { deepEquals(a[it], b[it]) }
+        }
+        if (a is List<*> && b is List<*>) {
+            return a.size == b.size &&
+                    a.indices.all { deepEquals(a[it], b[it]) }
+        }
+        if (a is Map<*, *> && b is Map<*, *>) {
+            return a.size == b.size && a.all {
+                (b as Map<Any?, Any?>).contains(it.key) &&
+                        deepEquals(it.value, b[it.key])
+            }
+        }
+        return a == b
     }
-    if (a is IntArray && b is IntArray) {
-        return a.contentEquals(b)
-    }
-    if (a is LongArray && b is LongArray) {
-        return a.contentEquals(b)
-    }
-    if (a is DoubleArray && b is DoubleArray) {
-        return a.contentEquals(b)
-    }
-    if (a is Array<*> && b is Array<*>) {
-      return a.size == b.size &&
-          a.indices.all{ deepEquals(a[it], b[it]) }
-    }
-    if (a is List<*> && b is List<*>) {
-      return a.size == b.size &&
-          a.indices.all{ deepEquals(a[it], b[it]) }
-    }
-    if (a is Map<*, *> && b is Map<*, *>) {
-      return a.size == b.size && a.all {
-          (b as Map<Any?, Any?>).contains(it.key) &&
-          deepEquals(it.value, b[it.key])
-      }
-    }
-    return a == b
-  }
-      
+
 }
 
 /**
@@ -74,10 +81,10 @@ private object MessagesPigeonUtils {
  * @property message The error message.
  * @property details The error details. Must be a datatype supported by the api codec.
  */
-class FlutterError (
-  val code: String,
-  override val message: String? = null,
-  val details: Any? = null
+class FlutterError(
+    val code: String,
+    override val message: String? = null,
+    val details: Any? = null
 ) : Throwable()
 
 /**
@@ -85,55 +92,55 @@ class FlutterError (
  * ///////////////////////////////////////////////////////////////////////////////////////////////////////
  */
 enum class MediaCommand(val raw: Int) {
-  PAUSE(0),
-  PLAY(1),
-  STOP(2),
-  TOGGLE_PLAY_PAUSE(3),
-  NEXT_TRACK(4),
-  PREVIOUS_TRACK(5),
-  REPEAT_MODE(6),
-  SHUFFLE_MODE(7),
-  PLAY_BACK_RATE(8),
-  SEEK_BACKWARD(9),
-  SEEK_FORWARD(10),
-  SKIP_BACKWARD(11),
-  SKIP_FORWARD(12),
-  POSITION(13),
-  RATING(14),
-  LIKE(15),
-  DISLIKE(16),
-  BOOKMARK(17);
+    PAUSE(0),
+    PLAY(1),
+    STOP(2),
+    TOGGLE_PLAY_PAUSE(3),
+    NEXT_TRACK(4),
+    PREVIOUS_TRACK(5),
+    REPEAT_MODE(6),
+    SHUFFLE_MODE(7),
+    PLAY_BACK_RATE(8),
+    SEEK_BACKWARD(9),
+    SEEK_FORWARD(10),
+    SKIP_BACKWARD(11),
+    SKIP_FORWARD(12),
+    POSITION(13),
+    RATING(14),
+    LIKE(15),
+    DISLIKE(16),
+    BOOKMARK(17);
 
-  companion object {
-    fun ofRaw(raw: Int): MediaCommand? {
-      return values().firstOrNull { it.raw == raw }
+    companion object {
+        fun ofRaw(raw: Int): MediaCommand? {
+            return values().firstOrNull { it.raw == raw }
+        }
     }
-  }
 }
 
 /**/////////////////////////////////////////////////////////////////////////////////////////////////////// */
 enum class MediaRepeatType(val raw: Int) {
-  NONE(0),
-  ONE(1),
-  ALL(2);
+    NONE(0),
+    ONE(1),
+    ALL(2);
 
-  companion object {
-    fun ofRaw(raw: Int): MediaRepeatType? {
-      return values().firstOrNull { it.raw == raw }
+    companion object {
+        fun ofRaw(raw: Int): MediaRepeatType? {
+            return values().firstOrNull { it.raw == raw }
+        }
     }
-  }
 }
 
 enum class MediaShuffleType(val raw: Int) {
-  NONE(0),
-  ITEMS(1),
-  COLLECTIONS(2);
+    NONE(0),
+    ITEMS(1),
+    COLLECTIONS(2);
 
-  companion object {
-    fun ofRaw(raw: Int): MediaShuffleType? {
-      return values().firstOrNull { it.raw == raw }
+    companion object {
+        fun ofRaw(raw: Int): MediaShuffleType? {
+            return values().firstOrNull { it.raw == raw }
+        }
     }
-  }
 }
 
 /**
@@ -142,46 +149,48 @@ enum class MediaShuffleType(val raw: Int) {
  *
  * Generated class from Pigeon that represents data sent in messages.
  */
-data class MediaItem (
-  val title: String? = null,
-  val artist: String? = null,
-  val artUri: String? = null,
-  val position: Double? = null,
-  val duration: Double? = null,
-  val playing: Boolean? = null
-)
- {
-  companion object {
-    fun fromList(pigeonVar_list: List<Any?>): MediaItem {
-      val title = pigeonVar_list[0] as String?
-      val artist = pigeonVar_list[1] as String?
-      val artUri = pigeonVar_list[2] as String?
-      val position = pigeonVar_list[3] as Double?
-      val duration = pigeonVar_list[4] as Double?
-      val playing = pigeonVar_list[5] as Boolean?
-      return MediaItem(title, artist, artUri, position, duration, playing)
+data class MediaItem(
+    val title: String? = null,
+    val artist: String? = null,
+    val artUri: String? = null,
+    val position: Double? = null,
+    val duration: Double? = null,
+    val playing: Boolean? = null
+) {
+    companion object {
+        fun fromList(pigeonVar_list: List<Any?>): MediaItem {
+            val title = pigeonVar_list[0] as String?
+            val artist = pigeonVar_list[1] as String?
+            val artUri = pigeonVar_list[2] as String?
+            val position = pigeonVar_list[3] as Double?
+            val duration = pigeonVar_list[4] as Double?
+            val playing = pigeonVar_list[5] as Boolean?
+            return MediaItem(title, artist, artUri, position, duration, playing)
+        }
     }
-  }
-  fun toList(): List<Any?> {
-    return listOf(
-      title,
-      artist,
-      artUri,
-      position,
-      duration,
-      playing,
-    )
-  }
-  override fun equals(other: Any?): Boolean {
-    if (other !is MediaItem) {
-      return false
-    }
-    if (this === other) {
-      return true
-    }
-    return MessagesPigeonUtils.deepEquals(toList(), other.toList())  }
 
-  override fun hashCode(): Int = toList().hashCode()
+    fun toList(): List<Any?> {
+        return listOf(
+            title,
+            artist,
+            artUri,
+            position,
+            duration,
+            playing,
+        )
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (other !is MediaItem) {
+            return false
+        }
+        if (this === other) {
+            return true
+        }
+        return MessagesPigeonUtils.deepEquals(toList(), other.toList())
+    }
+
+    override fun hashCode(): Int = toList().hashCode()
 }
 
 /**
@@ -189,91 +198,105 @@ data class MediaItem (
  *
  * Generated class from Pigeon that represents data sent in messages.
  */
-data class MediaNotification (
-  val command: MediaCommand,
-  val value: Any? = null
-)
- {
-  companion object {
-    fun fromList(pigeonVar_list: List<Any?>): MediaNotification {
-      val command = pigeonVar_list[0] as MediaCommand
-      val value = pigeonVar_list[1]
-      return MediaNotification(command, value)
+data class MediaNotification(
+    val command: MediaCommand,
+    val value: Any? = null
+) {
+    companion object {
+        fun fromList(pigeonVar_list: List<Any?>): MediaNotification {
+            val command = pigeonVar_list[0] as MediaCommand
+            val value = pigeonVar_list[1]
+            return MediaNotification(command, value)
+        }
     }
-  }
-  fun toList(): List<Any?> {
-    return listOf(
-      command,
-      value,
-    )
-  }
-  override fun equals(other: Any?): Boolean {
-    if (other !is MediaNotification) {
-      return false
-    }
-    if (this === other) {
-      return true
-    }
-    return MessagesPigeonUtils.deepEquals(toList(), other.toList())  }
 
-  override fun hashCode(): Int = toList().hashCode()
+    fun toList(): List<Any?> {
+        return listOf(
+            command,
+            value,
+        )
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (other !is MediaNotification) {
+            return false
+        }
+        if (this === other) {
+            return true
+        }
+        return MessagesPigeonUtils.deepEquals(toList(), other.toList())
+    }
+
+    override fun hashCode(): Int = toList().hashCode()
 }
+
 private open class messagesPigeonCodec : StandardMessageCodec() {
-  override fun readValueOfType(type: Byte, buffer: ByteBuffer): Any? {
-    return when (type) {
-      129.toByte() -> {
-        return (readValue(buffer) as Long?)?.let {
-          MediaCommand.ofRaw(it.toInt())
+    override fun readValueOfType(type: Byte, buffer: ByteBuffer): Any? {
+        return when (type) {
+            129.toByte() -> {
+                return (readValue(buffer) as Long?)?.let {
+                    MediaCommand.ofRaw(it.toInt())
+                }
+            }
+
+            130.toByte() -> {
+                return (readValue(buffer) as Long?)?.let {
+                    MediaRepeatType.ofRaw(it.toInt())
+                }
+            }
+
+            131.toByte() -> {
+                return (readValue(buffer) as Long?)?.let {
+                    MediaShuffleType.ofRaw(it.toInt())
+                }
+            }
+
+            132.toByte() -> {
+                return (readValue(buffer) as? List<Any?>)?.let {
+                    MediaItem.fromList(it)
+                }
+            }
+
+            133.toByte() -> {
+                return (readValue(buffer) as? List<Any?>)?.let {
+                    MediaNotification.fromList(it)
+                }
+            }
+
+            else -> super.readValueOfType(type, buffer)
         }
-      }
-      130.toByte() -> {
-        return (readValue(buffer) as Long?)?.let {
-          MediaRepeatType.ofRaw(it.toInt())
-        }
-      }
-      131.toByte() -> {
-        return (readValue(buffer) as Long?)?.let {
-          MediaShuffleType.ofRaw(it.toInt())
-        }
-      }
-      132.toByte() -> {
-        return (readValue(buffer) as? List<Any?>)?.let {
-          MediaItem.fromList(it)
-        }
-      }
-      133.toByte() -> {
-        return (readValue(buffer) as? List<Any?>)?.let {
-          MediaNotification.fromList(it)
-        }
-      }
-      else -> super.readValueOfType(type, buffer)
     }
-  }
-  override fun writeValue(stream: ByteArrayOutputStream, value: Any?)   {
-    when (value) {
-      is MediaCommand -> {
-        stream.write(129)
-        writeValue(stream, value.raw.toLong())
-      }
-      is MediaRepeatType -> {
-        stream.write(130)
-        writeValue(stream, value.raw.toLong())
-      }
-      is MediaShuffleType -> {
-        stream.write(131)
-        writeValue(stream, value.raw.toLong())
-      }
-      is MediaItem -> {
-        stream.write(132)
-        writeValue(stream, value.toList())
-      }
-      is MediaNotification -> {
-        stream.write(133)
-        writeValue(stream, value.toList())
-      }
-      else -> super.writeValue(stream, value)
+
+    override fun writeValue(stream: ByteArrayOutputStream, value: Any?) {
+        when (value) {
+            is MediaCommand -> {
+                stream.write(129)
+                writeValue(stream, value.raw.toLong())
+            }
+
+            is MediaRepeatType -> {
+                stream.write(130)
+                writeValue(stream, value.raw.toLong())
+            }
+
+            is MediaShuffleType -> {
+                stream.write(131)
+                writeValue(stream, value.raw.toLong())
+            }
+
+            is MediaItem -> {
+                stream.write(132)
+                writeValue(stream, value.toList())
+            }
+
+            is MediaNotification -> {
+                stream.write(133)
+                writeValue(stream, value.toList())
+            }
+
+            else -> super.writeValue(stream, value)
+        }
     }
-  }
 }
 
 /**
@@ -283,85 +306,113 @@ private open class messagesPigeonCodec : StandardMessageCodec() {
  * Generated interface from Pigeon that represents a handler of messages from Flutter.
  */
 interface MediaSessionProtocol {
-  fun setMedia(item: MediaItem)
-  fun setActiveCommands(commands: List<MediaCommand>)
+    fun setMedia(item: MediaItem)
+    fun setActiveCommands(commands: List<MediaCommand>)
 
-  companion object {
-    /** The codec used by MediaSessionProtocol. */
-    val codec: MessageCodec<Any?> by lazy {
-      messagesPigeonCodec()
-    }
-    /** Sets up an instance of `MediaSessionProtocol` to handle messages through the `binaryMessenger`. */
-    @JvmOverloads
-    fun setUp(binaryMessenger: BinaryMessenger, api: MediaSessionProtocol?, messageChannelSuffix: String = "") {
-      val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
-      run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_media_session.MediaSessionProtocol.setMedia$separatedMessageChannelSuffix", codec)
-        if (api != null) {
-          channel.setMessageHandler { message, reply ->
-            val args = message as List<Any?>
-            val itemArg = args[0] as MediaItem
-            val wrapped: List<Any?> = try {
-              api.setMedia(itemArg)
-              listOf(null)
-            } catch (exception: Throwable) {
-              MessagesPigeonUtils.wrapError(exception)
-            }
-            reply.reply(wrapped)
-          }
-        } else {
-          channel.setMessageHandler(null)
+    companion object {
+        /** The codec used by MediaSessionProtocol. */
+        val codec: MessageCodec<Any?> by lazy {
+            messagesPigeonCodec()
         }
-      }
-      run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_media_session.MediaSessionProtocol.setActiveCommands$separatedMessageChannelSuffix", codec)
-        if (api != null) {
-          channel.setMessageHandler { message, reply ->
-            val args = message as List<Any?>
-            val commandsArg = args[0] as List<MediaCommand>
-            val wrapped: List<Any?> = try {
-              api.setActiveCommands(commandsArg)
-              listOf(null)
-            } catch (exception: Throwable) {
-              MessagesPigeonUtils.wrapError(exception)
+
+        /** Sets up an instance of `MediaSessionProtocol` to handle messages through the `binaryMessenger`. */
+        @JvmOverloads
+        fun setUp(
+            binaryMessenger: BinaryMessenger,
+            api: MediaSessionProtocol?,
+            messageChannelSuffix: String = ""
+        ) {
+            val separatedMessageChannelSuffix =
+                if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+            run {
+                val channel = BasicMessageChannel<Any?>(
+                    binaryMessenger,
+                    "dev.flutter.pigeon.flutter_media_session.MediaSessionProtocol.setMedia$separatedMessageChannelSuffix",
+                    codec
+                )
+                if (api != null) {
+                    channel.setMessageHandler { message, reply ->
+                        val args = message as List<Any?>
+                        val itemArg = args[0] as MediaItem
+                        val wrapped: List<Any?> = try {
+                            api.setMedia(itemArg)
+                            listOf(null)
+                        } catch (exception: Throwable) {
+                            MessagesPigeonUtils.wrapError(exception)
+                        }
+                        reply.reply(wrapped)
+                    }
+                } else {
+                    channel.setMessageHandler(null)
+                }
             }
-            reply.reply(wrapped)
-          }
-        } else {
-          channel.setMessageHandler(null)
+            run {
+                val channel = BasicMessageChannel<Any?>(
+                    binaryMessenger,
+                    "dev.flutter.pigeon.flutter_media_session.MediaSessionProtocol.setActiveCommands$separatedMessageChannelSuffix",
+                    codec
+                )
+                if (api != null) {
+                    channel.setMessageHandler { message, reply ->
+                        val args = message as List<Any?>
+                        val commandsArg = args[0] as List<MediaCommand>
+                        val wrapped: List<Any?> = try {
+                            api.setActiveCommands(commandsArg)
+                            listOf(null)
+                        } catch (exception: Throwable) {
+                            MessagesPigeonUtils.wrapError(exception)
+                        }
+                        reply.reply(wrapped)
+                    }
+                } else {
+                    channel.setMessageHandler(null)
+                }
+            }
         }
-      }
     }
-  }
 }
+
 /**
  * //////////////////////////////////////////////////////////////////////////////////////////////////////
  * ///////////////////////////////////////////////////////////////////////////////////////////////////////
  *
  * Generated class from Pigeon that represents Flutter messages that can be called from Kotlin.
  */
-class MediaCommandCenter(private val binaryMessenger: BinaryMessenger, private val messageChannelSuffix: String = "") {
-  companion object {
-    /** The codec used by MediaCommandCenter. */
-    val codec: MessageCodec<Any?> by lazy {
-      messagesPigeonCodec()
-    }
-  }
-  fun notification(notificationArg: MediaNotification, callback: (Result<Unit>) -> Unit)
-{
-    val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
-    val channelName = "dev.flutter.pigeon.flutter_media_session.MediaCommandCenter.notification$separatedMessageChannelSuffix"
-    val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
-    channel.send(listOf(notificationArg)) {
-      if (it is List<*>) {
-        if (it.size > 1) {
-          callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
-        } else {
-          callback(Result.success(Unit))
+class MediaCommandCenter(
+    private val binaryMessenger: BinaryMessenger,
+    private val messageChannelSuffix: String = ""
+) {
+    companion object {
+        /** The codec used by MediaCommandCenter. */
+        val codec: MessageCodec<Any?> by lazy {
+            messagesPigeonCodec()
         }
-      } else {
-        callback(Result.failure(MessagesPigeonUtils.createConnectionError(channelName)))
-      } 
     }
-  }
+
+    fun notification(notificationArg: MediaNotification, callback: (Result<Unit>) -> Unit) {
+        val separatedMessageChannelSuffix =
+            if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+        val channelName =
+            "dev.flutter.pigeon.flutter_media_session.MediaCommandCenter.notification$separatedMessageChannelSuffix"
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
+        channel.send(listOf(notificationArg)) {
+            if (it is List<*>) {
+                if (it.size > 1) {
+                    callback(
+                        Result.failure(
+                            FlutterError(
+                                it[0] as String,
+                                it[1] as String,
+                                it[2] as String?
+                            )
+                        )
+                    )
+                } else {
+                    callback(Result.success(Unit))
+                }
+            } else {
+                callback(Result.failure(MessagesPigeonUtils.createConnectionError(channelName)))
+            }
+        }
+    }
 }
