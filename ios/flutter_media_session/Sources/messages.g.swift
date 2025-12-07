@@ -175,6 +175,7 @@ enum MediaShuffleType: Int {
 struct MediaItem: Hashable {
   var title: String? = nil
   var artist: String? = nil
+  var album: String? = nil
   var artUri: String? = nil
   var position: Double? = nil
   var duration: Double? = nil
@@ -185,14 +186,16 @@ struct MediaItem: Hashable {
   static func fromList(_ pigeonVar_list: [Any?]) -> MediaItem? {
     let title: String? = nilOrValue(pigeonVar_list[0])
     let artist: String? = nilOrValue(pigeonVar_list[1])
-    let artUri: String? = nilOrValue(pigeonVar_list[2])
-    let position: Double? = nilOrValue(pigeonVar_list[3])
-    let duration: Double? = nilOrValue(pigeonVar_list[4])
-    let playing: Bool? = nilOrValue(pigeonVar_list[5])
+    let album: String? = nilOrValue(pigeonVar_list[2])
+    let artUri: String? = nilOrValue(pigeonVar_list[3])
+    let position: Double? = nilOrValue(pigeonVar_list[4])
+    let duration: Double? = nilOrValue(pigeonVar_list[5])
+    let playing: Bool? = nilOrValue(pigeonVar_list[6])
 
     return MediaItem(
       title: title,
       artist: artist,
+      album: album,
       artUri: artUri,
       position: position,
       duration: duration,
@@ -203,6 +206,7 @@ struct MediaItem: Hashable {
     return [
       title,
       artist,
+      album,
       artUri,
       position,
       duration,

@@ -145,6 +145,7 @@ enum class MediaShuffleType(val raw: Int) {
 data class MediaItem (
   val title: String? = null,
   val artist: String? = null,
+  val album: String? = null,
   val artUri: String? = null,
   val position: Double? = null,
   val duration: Double? = null,
@@ -155,17 +156,19 @@ data class MediaItem (
     fun fromList(pigeonVar_list: List<Any?>): MediaItem {
       val title = pigeonVar_list[0] as String?
       val artist = pigeonVar_list[1] as String?
-      val artUri = pigeonVar_list[2] as String?
-      val position = pigeonVar_list[3] as Double?
-      val duration = pigeonVar_list[4] as Double?
-      val playing = pigeonVar_list[5] as Boolean?
-      return MediaItem(title, artist, artUri, position, duration, playing)
+      val album = pigeonVar_list[2] as String?
+      val artUri = pigeonVar_list[3] as String?
+      val position = pigeonVar_list[4] as Double?
+      val duration = pigeonVar_list[5] as Double?
+      val playing = pigeonVar_list[6] as Boolean?
+      return MediaItem(title, artist, album, artUri, position, duration, playing)
     }
   }
   fun toList(): List<Any?> {
     return listOf(
       title,
       artist,
+      album,
       artUri,
       position,
       duration,

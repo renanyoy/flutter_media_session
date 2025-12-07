@@ -81,6 +81,7 @@ class MediaItem {
   MediaItem({
     this.title,
     this.artist,
+    this.album,
     this.artUri,
     this.position,
     this.duration,
@@ -90,6 +91,8 @@ class MediaItem {
   String? title;
 
   String? artist;
+
+  String? album;
 
   String? artUri;
 
@@ -103,6 +106,7 @@ class MediaItem {
     return <Object?>[
       title,
       artist,
+      album,
       artUri,
       position,
       duration,
@@ -118,10 +122,11 @@ class MediaItem {
     return MediaItem(
       title: result[0] as String?,
       artist: result[1] as String?,
-      artUri: result[2] as String?,
-      position: result[3] as double?,
-      duration: result[4] as double?,
-      playing: result[5] as bool?,
+      album: result[2] as String?,
+      artUri: result[3] as String?,
+      position: result[4] as double?,
+      duration: result[5] as double?,
+      playing: result[6] as bool?,
     );
   }
 

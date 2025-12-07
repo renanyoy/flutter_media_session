@@ -20,6 +20,7 @@ import 'package:pigeon/pigeon.dart';
 class MediaItem {
   String? title;
   String? artist;
+  String? album;
   String? artUri;
   double? position;
   double? duration;

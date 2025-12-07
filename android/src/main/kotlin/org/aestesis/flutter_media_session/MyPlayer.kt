@@ -1,15 +1,18 @@
 import android.os.Looper
+import android.os.Looper.getMainLooper
 import android.view.Surface
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import android.view.TextureView
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.DeviceInfo
+import androidx.media3.common.DeviceInfo.PLAYBACK_TYPE_LOCAL
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.PlaybackParameters
 import androidx.media3.common.Player
+import androidx.media3.common.Player.MEDIA_ITEM_TRANSITION_REASON_PLAYLIST_CHANGED
 import androidx.media3.common.Timeline
 import androidx.media3.common.TrackSelectionParameters
 import androidx.media3.common.Tracks
@@ -19,17 +22,20 @@ import androidx.media3.common.util.Size
 import androidx.media3.common.util.UnstableApi
 
 @UnstableApi
-class MediaPlayer : Player {
+class MyPlayer : Player {
+    var onNotification: (MediaNotification) -> Unit = {}
+    var mediaItem: MediaItem? = null
+    var listeners: ArrayList<Player.Listener> = ArrayList()
     override fun getApplicationLooper(): Looper {
-        TODO("Not yet implemented")
+        return getMainLooper()
     }
 
     override fun addListener(listener: Player.Listener) {
-        TODO("Not yet implemented")
+        listeners.add(listener)
     }
 
     override fun removeListener(listener: Player.Listener) {
-        TODO("Not yet implemented")
+        listeners.remove(listener)
     }
 
     override fun setMediaItems(mediaItems: List<MediaItem>) {
@@ -52,7 +58,10 @@ class MediaPlayer : Player {
     }
 
     override fun setMediaItem(mediaItem: MediaItem) {
-        TODO("Not yet implemented")
+        this.mediaItem = mediaItem
+        for (listener in listeners) {
+            listener.onMediaItemTransition(mediaItem, MEDIA_ITEM_TRANSITION_REASON_PLAYLIST_CHANGED)
+        }
     }
 
     override fun setMediaItem(
@@ -125,7 +134,7 @@ class MediaPlayer : Player {
     }
 
     override fun canAdvertiseSession(): Boolean {
-        TODO("Not yet implemented")
+        return true
     }
 
     override fun getAvailableCommands(): Player.Commands {
@@ -153,19 +162,18 @@ class MediaPlayer : Player {
     }
 
     override fun play() {
-        TODO("Not yet implemented")
+        onNotification.invoke(MediaNotification(MediaCommand.PLAY))
     }
 
     override fun pause() {
-        TODO("Not yet implemented")
+        onNotification.invoke(MediaNotification(MediaCommand.PAUSE))
     }
 
     override fun setPlayWhenReady(playWhenReady: Boolean) {
-        TODO("Not yet implemented")
     }
 
     override fun getPlayWhenReady(): Boolean {
-        TODO("Not yet implemented")
+        return false
     }
 
     override fun setRepeatMode(repeatMode: Int) {
@@ -185,55 +193,54 @@ class MediaPlayer : Player {
     }
 
     override fun isLoading(): Boolean {
-        TODO("Not yet implemented")
+        return false
     }
 
     override fun seekToDefaultPosition() {
-        TODO("Not yet implemented")
+
     }
 
     override fun seekToDefaultPosition(mediaItemIndex: Int) {
-        TODO("Not yet implemented")
+
     }
 
     override fun seekTo(positionMs: Long) {
-        TODO("Not yet implemented")
+
     }
 
     override fun seekTo(mediaItemIndex: Int, positionMs: Long) {
-        TODO("Not yet implemented")
+
     }
 
     override fun getSeekBackIncrement(): Long {
-        TODO("Not yet implemented")
+        return 0
     }
 
     override fun seekBack() {
-        TODO("Not yet implemented")
+
     }
 
     override fun getSeekForwardIncrement(): Long {
-        TODO("Not yet implemented")
+        return 0
     }
 
     override fun seekForward() {
-        TODO("Not yet implemented")
     }
 
     override fun hasPreviousMediaItem(): Boolean {
-        TODO("Not yet implemented")
+        return false
     }
 
     override fun seekToPreviousMediaItem() {
-        TODO("Not yet implemented")
+        onNotification.invoke(MediaNotification(MediaCommand.PREVIOUS_TRACK))
     }
 
     override fun getMaxSeekToPreviousPosition(): Long {
-        TODO("Not yet implemented")
+        return 0
     }
 
     override fun seekToPrevious() {
-        TODO("Not yet implemented")
+        onNotification.invoke(MediaNotification(MediaCommand.PREVIOUS_TRACK))
     }
 
     override fun hasNextMediaItem(): Boolean {
@@ -241,11 +248,11 @@ class MediaPlayer : Player {
     }
 
     override fun seekToNextMediaItem() {
-        TODO("Not yet implemented")
+        onNotification.invoke(MediaNotification(MediaCommand.NEXT_TRACK))
     }
 
     override fun seekToNext() {
-        TODO("Not yet implemented")
+        onNotification.invoke(MediaNotification(MediaCommand.NEXT_TRACK))
     }
 
     override fun setPlaybackParameters(playbackParameters: PlaybackParameters) {
@@ -261,47 +268,48 @@ class MediaPlayer : Player {
     }
 
     override fun stop() {
-        TODO("Not yet implemented")
+        onNotification.invoke(MediaNotification(MediaCommand.STOP))
+
     }
 
     override fun release() {
-        TODO("Not yet implemented")
+
     }
 
     override fun getCurrentTracks(): Tracks {
-        TODO("Not yet implemented")
+        return Tracks.EMPTY
     }
 
     override fun getTrackSelectionParameters(): TrackSelectionParameters {
-        TODO("Not yet implemented")
+        return TrackSelectionParameters.Builder().build()
     }
 
     override fun setTrackSelectionParameters(parameters: TrackSelectionParameters) {
-        TODO("Not yet implemented")
+
     }
 
     override fun getMediaMetadata(): MediaMetadata {
-        TODO("Not yet implemented")
+        return MediaMetadata.Builder().build()
     }
 
     override fun getPlaylistMetadata(): MediaMetadata {
-        TODO("Not yet implemented")
+        return MediaMetadata.Builder().build()
     }
 
     override fun setPlaylistMetadata(mediaMetadata: MediaMetadata) {
-        TODO("Not yet implemented")
+
     }
 
     override fun getCurrentManifest(): Any {
-        TODO("Not yet implemented")
+        return 0
     }
 
     override fun getCurrentTimeline(): Timeline {
-        TODO("Not yet implemented")
+        return Timeline.EMPTY
     }
 
     override fun getCurrentPeriodIndex(): Int {
-        TODO("Not yet implemented")
+        return 0
     }
 
     @Deprecated("Deprecated in Java")
@@ -310,217 +318,218 @@ class MediaPlayer : Player {
     }
 
     override fun getCurrentMediaItemIndex(): Int {
-        TODO("Not yet implemented")
+        return 0
     }
 
     @Deprecated("Deprecated in Java")
     override fun getNextWindowIndex(): Int {
-        TODO("Not yet implemented")
+        return 0
     }
 
     override fun getNextMediaItemIndex(): Int {
-        TODO("Not yet implemented")
+        return 0
     }
 
     @Deprecated("Deprecated in Java")
     override fun getPreviousWindowIndex(): Int {
-        TODO("Not yet implemented")
+        return 0
     }
 
     override fun getPreviousMediaItemIndex(): Int {
-        TODO("Not yet implemented")
+        return 0
     }
 
     override fun getCurrentMediaItem(): MediaItem {
-        TODO("Not yet implemented")
+        return MediaItem.Builder().build()
     }
 
     override fun getMediaItemCount(): Int {
-        TODO("Not yet implemented")
+        return 0
     }
 
     override fun getMediaItemAt(index: Int): MediaItem {
-        TODO("Not yet implemented")
+        return MediaItem.Builder().build()
     }
 
     override fun getDuration(): Long {
-        TODO("Not yet implemented")
+        return 0
     }
 
     override fun getCurrentPosition(): Long {
-        TODO("Not yet implemented")
+        return 0
     }
 
     override fun getBufferedPosition(): Long {
-        TODO("Not yet implemented")
+        return 0
     }
 
     override fun getBufferedPercentage(): Int {
-        TODO("Not yet implemented")
+        return 0
     }
 
     override fun getTotalBufferedDuration(): Long {
-        TODO("Not yet implemented")
+        return 0
     }
 
     @Deprecated("Deprecated in Java")
     override fun isCurrentWindowDynamic(): Boolean {
-        TODO("Not yet implemented")
+        return false
     }
 
     override fun isCurrentMediaItemDynamic(): Boolean {
-        TODO("Not yet implemented")
+        return true
     }
 
     @Deprecated("Deprecated in Java")
     override fun isCurrentWindowLive(): Boolean {
-        TODO("Not yet implemented")
+        return true
     }
 
     override fun isCurrentMediaItemLive(): Boolean {
-        TODO("Not yet implemented")
+        return true
     }
 
     override fun getCurrentLiveOffset(): Long {
-        TODO("Not yet implemented")
+        return 0
     }
 
     @Deprecated("Deprecated in Java")
     override fun isCurrentWindowSeekable(): Boolean {
-        TODO("Not yet implemented")
+        return false
     }
 
     override fun isCurrentMediaItemSeekable(): Boolean {
-        TODO("Not yet implemented")
+        return false
     }
 
     override fun isPlayingAd(): Boolean {
-        TODO("Not yet implemented")
+        return false
     }
 
     override fun getCurrentAdGroupIndex(): Int {
-        TODO("Not yet implemented")
+        return 0
     }
 
     override fun getCurrentAdIndexInAdGroup(): Int {
-        TODO("Not yet implemented")
+        return 0
     }
 
     override fun getContentDuration(): Long {
-        TODO("Not yet implemented")
+        return 0
     }
 
     override fun getContentPosition(): Long {
-        TODO("Not yet implemented")
+        return 0
     }
 
     override fun getContentBufferedPosition(): Long {
-        TODO("Not yet implemented")
+        return 0
     }
 
     override fun getAudioAttributes(): AudioAttributes {
-        TODO("Not yet implemented")
+        return AudioAttributes.Builder().build()
     }
 
     override fun setVolume(volume: Float) {
-        TODO("Not yet implemented")
+
     }
 
     override fun getVolume(): Float {
-        TODO("Not yet implemented")
+        return 0.5f
     }
 
     override fun clearVideoSurface() {
-        TODO("Not yet implemented")
+
     }
 
     override fun clearVideoSurface(surface: Surface?) {
-        TODO("Not yet implemented")
+
     }
 
     override fun setVideoSurface(surface: Surface?) {
-        TODO("Not yet implemented")
+
     }
 
     override fun setVideoSurfaceHolder(surfaceHolder: SurfaceHolder?) {
-        TODO("Not yet implemented")
+
     }
 
     override fun clearVideoSurfaceHolder(surfaceHolder: SurfaceHolder?) {
-        TODO("Not yet implemented")
+
     }
 
     override fun setVideoSurfaceView(surfaceView: SurfaceView?) {
-        TODO("Not yet implemented")
+
     }
 
     override fun clearVideoSurfaceView(surfaceView: SurfaceView?) {
-        TODO("Not yet implemented")
+
     }
 
     override fun setVideoTextureView(textureView: TextureView?) {
-        TODO("Not yet implemented")
+
     }
 
     override fun clearVideoTextureView(textureView: TextureView?) {
-        TODO("Not yet implemented")
+
     }
 
     override fun getVideoSize(): VideoSize {
-        TODO("Not yet implemented")
+        return VideoSize.UNKNOWN
     }
 
     @UnstableApi
     override fun getSurfaceSize(): Size {
-        TODO("Not yet implemented")
+        return Size(0, 0)
     }
 
     override fun getCurrentCues(): CueGroup {
-        TODO("Not yet implemented")
+        return CueGroup.EMPTY_TIME_ZERO
     }
 
     override fun getDeviceInfo(): DeviceInfo {
-        TODO("Not yet implemented")
+        return DeviceInfo.Builder(PLAYBACK_TYPE_LOCAL).build()
     }
 
     override fun getDeviceVolume(): Int {
-        TODO("Not yet implemented")
+        return 0
     }
 
     override fun isDeviceMuted(): Boolean {
-        TODO("Not yet implemented")
+        return false
     }
 
     @Deprecated("Deprecated in Java")
     override fun setDeviceVolume(volume: Int) {
-        TODO("Not yet implemented")
+
+
     }
 
     override fun setDeviceVolume(volume: Int, flags: Int) {
-        TODO("Not yet implemented")
+
     }
 
     @Deprecated("Deprecated in Java")
     override fun increaseDeviceVolume() {
-        TODO("Not yet implemented")
+
     }
 
     override fun increaseDeviceVolume(flags: Int) {
-        TODO("Not yet implemented")
+
     }
 
     @Deprecated("Deprecated in Java")
     override fun decreaseDeviceVolume() {
-        TODO("Not yet implemented")
+
     }
 
     override fun decreaseDeviceVolume(flags: Int) {
-        TODO("Not yet implemented")
+
     }
 
     @Deprecated("Deprecated in Java")
     override fun setDeviceMuted(muted: Boolean) {
-        TODO("Not yet implemented")
+
     }
 
     override fun setDeviceMuted(muted: Boolean, flags: Int) {
@@ -531,7 +540,7 @@ class MediaPlayer : Player {
         audioAttributes: AudioAttributes,
         handleAudioFocus: Boolean
     ) {
-        TODO("Not yet implemented")
+
     }
 
 }
