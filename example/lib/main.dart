@@ -32,6 +32,7 @@ class _MyAppState extends State<MyApp> {
       await MediaSession.setMedia(
         MediaItem(title: 'title', artist: 'renan', playing: true),
       );
+      await MediaSession.setCommands([.stop]);
     } on PlatformException catch (error) {
       print(error);
     }

@@ -62,6 +62,27 @@ Join an **artUri** URI to your MediaItem description
     });
     
 ```
+
+### Android setup
+
+Declare the following permissions and service in the manifest
+````xml
+<uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+<uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+
+<service
+    android:name=".FlutterMediaSessionService"
+    android:foregroundServiceType="mediaPlayback"
+    android:exported="true">
+    <intent-filter>
+        <action android:name="androidx.media3.session.MediaSessionService"/>
+        <action android:name="android.media.browse.MediaBrowserService"/>
+    </intent-filter>
+</service>
+````
+
+
+
 If you like this plugin, you can [pay me a coffee](https://ko-fi.com/aestesis).
 
 Contact: renan@aestesis.org

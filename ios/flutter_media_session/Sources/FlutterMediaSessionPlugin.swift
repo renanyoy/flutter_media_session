@@ -154,7 +154,7 @@ public class FlutterMediaSessionPlugin: NSObject, FlutterPlugin, MediaSessionPro
 }
 
 func not(command: MediaCommand, value: Any? = nil) -> MPRemoteCommandHandlerStatus {
-  FlutterMediaSessionPlugin.message?.notification(
+  FlutterMediaSessionPlugin.message?.notify(
     notification: MediaNotification(command: command, value: value),
     completion: { r in
       if let e = r as? PigeonError {

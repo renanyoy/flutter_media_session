@@ -310,26 +310,26 @@ class MediaSessionProtocol {
 abstract class MediaNotificationHandler {
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
 
-  void notification(MediaNotification notification);
+  void notify(MediaNotification notification);
 
   static void setUp(MediaNotificationHandler? api, {BinaryMessenger? binaryMessenger, String messageChannelSuffix = '',}) {
     messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
     {
       final pigeonVar_channel = BasicMessageChannel<Object?>(
-          'dev.flutter.pigeon.flutter_media_session.MediaNotificationHandler.notification$messageChannelSuffix', pigeonChannelCodec,
+          'dev.flutter.pigeon.flutter_media_session.MediaNotificationHandler.notify$messageChannelSuffix', pigeonChannelCodec,
           binaryMessenger: binaryMessenger);
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
         pigeonVar_channel.setMessageHandler((Object? message) async {
           assert(message != null,
-          'Argument for dev.flutter.pigeon.flutter_media_session.MediaNotificationHandler.notification was null.');
+          'Argument for dev.flutter.pigeon.flutter_media_session.MediaNotificationHandler.notify was null.');
           final List<Object?> args = (message as List<Object?>?)!;
           final MediaNotification? arg_notification = (args[0] as MediaNotification?);
           assert(arg_notification != null,
-              'Argument for dev.flutter.pigeon.flutter_media_session.MediaNotificationHandler.notification was null, expected non-null MediaNotification.');
+              'Argument for dev.flutter.pigeon.flutter_media_session.MediaNotificationHandler.notify was null, expected non-null MediaNotification.');
           try {
-            api.notification(arg_notification!);
+            api.notify(arg_notification!);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);

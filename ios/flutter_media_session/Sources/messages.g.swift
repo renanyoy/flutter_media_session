@@ -371,7 +371,7 @@ class MediaSessionProtocolSetup {
 ///
 /// Generated protocol from Pigeon that represents Flutter messages that can be called from Swift.
 protocol MediaNotificationHandlerProtocol {
-  func notification(notification notificationArg: MediaNotification, completion: @escaping (Result<Void, PigeonError>) -> Void)
+  func notify(notification notificationArg: MediaNotification, completion: @escaping (Result<Void, PigeonError>) -> Void)
 }
 class MediaNotificationHandler: MediaNotificationHandlerProtocol {
   private let binaryMessenger: FlutterBinaryMessenger
@@ -383,8 +383,8 @@ class MediaNotificationHandler: MediaNotificationHandlerProtocol {
   var codec: MessagesPigeonCodec {
     return MessagesPigeonCodec.shared
   }
-  func notification(notification notificationArg: MediaNotification, completion: @escaping (Result<Void, PigeonError>) -> Void) {
-    let channelName: String = "dev.flutter.pigeon.flutter_media_session.MediaNotificationHandler.notification\(messageChannelSuffix)"
+  func notify(notification notificationArg: MediaNotification, completion: @escaping (Result<Void, PigeonError>) -> Void) {
+    let channelName: String = "dev.flutter.pigeon.flutter_media_session.MediaNotificationHandler.notify\(messageChannelSuffix)"
     let channel = FlutterBasicMessageChannel(name: channelName, binaryMessenger: binaryMessenger, codec: codec)
     channel.sendMessage([notificationArg] as [Any?]) { response in
       guard let listResponse = response as? [Any?] else {

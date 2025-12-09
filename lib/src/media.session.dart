@@ -56,7 +56,7 @@ class _NoticationHandler extends MediaNotificationHandler {
     MediaNotificationHandler.setUp(this);
   }
   @override
-  void notification(MediaNotification notification) {
+  void notify(MediaNotification notification) {
     _messageCtrl.add(notification);
   }
 }
