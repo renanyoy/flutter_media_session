@@ -11,7 +11,9 @@ import 'package:pigeon/pigeon.dart';
     swiftOptions: SwiftOptions(),
     kotlinOut:
         'android/src/main/kotlin/org/aestesis/flutter_media_session/messages.g.kt',
-    kotlinOptions: KotlinOptions(),
+    kotlinOptions: KotlinOptions(
+      package: 'org.aestesis.flutter_media_session',
+    ),
     dartPackageName: 'flutter_media_session',
   ),
 )

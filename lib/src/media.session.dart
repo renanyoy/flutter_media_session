@@ -9,6 +9,7 @@ import './messages.g.dart';
 class MediaSession {
   static final _session = MediaSessionProtocol();
   static final _center = _NoticationHandler();
+  static late final MediaStreams streams;
   static Future<void> setCommands(List<MediaCommand> commands) =>
       _session.setActiveCommands(commands);
   static Future<void> setMedia(MediaItem item) => _session.setMedia(item);
@@ -23,10 +24,18 @@ class MediaSession {
     onDone: onDone,
     cancelOnError: cancelOnError,
   );
+  static Future<Set<session.AudioDevice>> get devices async {
+    final audio = await session.AudioSession.instance;
+    return await audio.getDevices();
+  }
+
   static Future<void> setSession(AudioSession type, {bool? active}) async {
     final audio = await session.AudioSession.instance;
     if (active != null) {
       audio.setActive(active);
+    }
+    if (!audio.isConfigured) {
+      streams = MediaStreams(audio);
     }
     switch (type) {
       case AudioSession.music:
@@ -78,6 +87,23 @@ extension MediaItemCopyExt on MediaItem {
     duration: duration ?? this.duration,
     playing: playing ?? this.playing,
   );
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+class MediaStreams {
+  final session.AudioSession _session;
+  Stream<Set<session.AudioDevice>> get devices => _session.devicesStream;
+  Stream<session.AudioSessionConfiguration> get configuration =>
+      _session.configurationStream;
+  Stream<session.AudioDevicesChangedEvent> get devicesChanged =>
+      _session.devicesChangedEventStream;
+  Stream<session.AudioInterruptionEvent> get interuption =>
+      _session.interruptionEventStream;
+  Stream<void> get noisy => _session.becomingNoisyEventStream;
+  Stream<MediaNotification> get command =>
+      MediaSession._center._messageCtrl.stream;
+  MediaStreams(session.AudioSession session) : _session = session;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////

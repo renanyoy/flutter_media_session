@@ -2,4 +2,18 @@
   package="org.aestesis.flutter_media_session">
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <!--
+    <application>
+        <service
+            android:name=".FlutterMediaSessionService"
+            android:foregroundServiceType="mediaPlayback"
+            android:exported="true"
+            >
+            <intent-filter>
+                <action android:name="androidx.media3.session.MediaSessionService"/>
+                <action android:name="android.media.browse.MediaBrowserService"/>
+            </intent-filter>
+        </service>
+    </application>
+    -->
 </manifest>

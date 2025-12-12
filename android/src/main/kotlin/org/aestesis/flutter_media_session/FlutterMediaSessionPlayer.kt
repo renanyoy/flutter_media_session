@@ -20,18 +20,17 @@ import androidx.media3.common.VideoSize
 import androidx.media3.common.text.CueGroup
 import androidx.media3.common.util.Size
 import androidx.media3.common.util.UnstableApi
+import org.aestesis.flutter_media_session.MediaCommand
+import org.aestesis.flutter_media_session.MediaNotification
 import java.lang.Boolean.FALSE
 
 @UnstableApi
-class FlutterMediaSessionPlayer(onNotification: (MediaNotification) -> Unit) : Player {
-    var onNotification: (MediaNotification) -> Unit = {}
+class FlutterMediaSessionPlayer : Player {
+    var onNotification: (org.aestesis.flutter_media_session.MediaNotification) -> Unit = {}
     var listeners: ArrayList<Player.Listener> = ArrayList()
     var mMediaItem: MediaItem? = null
     var playing: Boolean = FALSE
 
-    init {
-        this.onNotification = onNotification
-    }
     override fun getApplicationLooper(): Looper = getMainLooper()
 
     override fun addListener(listener: Player.Listener) {
@@ -149,9 +148,7 @@ class FlutterMediaSessionPlayer(onNotification: (MediaNotification) -> Unit) : P
 
     override fun getPlaybackSuppressionReason(): Int = Player.PLAYBACK_SUPPRESSION_REASON_NONE
 
-    override fun isPlaying(): Boolean {
-        return playing;
-    }
+    override fun isPlaying(): Boolean = playing
 
     override fun getPlayerError(): PlaybackException = PlaybackException("none", null, 0)
 
@@ -315,13 +312,9 @@ class FlutterMediaSessionPlayer(onNotification: (MediaNotification) -> Unit) : P
 
     override fun isPlayingAd(): Boolean = false
 
-    override fun getCurrentAdGroupIndex(): Int {
-        return -1
-    }
+    override fun getCurrentAdGroupIndex(): Int = -1
 
-    override fun getCurrentAdIndexInAdGroup(): Int {
-        return 0
-    }
+    override fun getCurrentAdIndexInAdGroup(): Int = 0
 
     override fun getContentDuration(): Long = 0
 
